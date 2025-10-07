@@ -10,13 +10,31 @@
                 <h4 class="mb-0"><i class="bi bi-plus-circle"></i> Create New Project</h4>
             </div>
             <div class="card-body">
+                {% if form and form.errors %}
+                <div class="alert alert-danger" role="alert">
+                    <strong>ไม่สามารถสร้างโปรเจกต์ได้:</strong>
+                    <ul class="mb-0">
+                        {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                                <li>{{ field|title }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
                 <form method="post">
                     {% csrf_token %}
                     
                     <div class="mb-3">
                         <label for="name" class="form-label">Project Name *</label>
-                        <input type="text" class="form-control" id="name" name="name" required>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ form.name.value|default:'' }}" required>
                         <div class="form-text">Choose a unique name for your project</div>
+                        {% if form.name.errors %}
+                        <div class="text-danger small">{{ form.name.errors|join:', ' }}</div>
+                        {% endif %}
                     </div>
                     
                     {% if has_github_connected and github_repos %}
@@ -35,20 +53,26 @@
                     <div class="mb-3">
                         <label for="github_repo_url" class="form-label">GitHub Repository URL *</label>
                         <input type="url" class="form-control" id="github_repo_url" name="github_repo_url" 
-                               placeholder="https://github.com/username/repository" required>
+                               placeholder="https://github.com/username/repository" value="{{ form.github_repo_url.value|default:'' }}" required>
                         <div class="form-text">The GitHub repository containing your application code</div>
+                        {% if form.github_repo_url.errors %}
+                        <div class="text-danger small">{{ form.github_repo_url.errors|join:', ' }}</div>
+                        {% endif %}
                     </div>
                     
                     <div class="mb-3">
                         <label for="exposed_port" class="form-label">Port</label>
                         <input type="number" class="form-control" id="exposed_port" name="exposed_port" 
-                               placeholder="3000" min="1" max="65535">
+                               placeholder="3000" min="1" max="65535" value="{{ form.exposed_port.value|default_if_none:'' }}">
                         <div class="form-text">Port number for your application (auto-assigned if empty)</div>
+                        {% if form.exposed_port.errors %}
+                        <div class="text-danger small">{{ form.exposed_port.errors|join:', ' }}</div>
+                        {% endif %}
                     </div>
                     
                     <div class="mb-3">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="is_public" name="is_public">
+                            <input class="form-check-input" type="checkbox" id="is_public" name="is_public" {% if form.is_public.value %}checked{% endif %}>
                             <label class="form-check-label" for="is_public">
                                 Make this project public (others can view and deploy)
                             </label>
@@ -58,33 +82,51 @@
                     <!-- Advanced build & run settings -->
                     <div class="mb-3">
                         <label for="dockerfile_path" class="form-label">Dockerfile Path</label>
-                        <input type="text" class="form-control" id="dockerfile_path" name="dockerfile_path" placeholder="Dockerfile">
+                        <input type="text" class="form-control" id="dockerfile_path" name="dockerfile_path" placeholder="Dockerfile" value="{{ form.dockerfile_path.value|default:'' }}">
                         <div class="form-text">Relative path to Dockerfile (default: Dockerfile at repository root)</div>
+                        {% if form.dockerfile_path.errors %}
+                        <div class="text-danger small">{{ form.dockerfile_path.errors|join:', ' }}</div>
+                        {% endif %}
                     </div>
 
                     <div class="mb-3">
                         <label for="build_command" class="form-label">Custom Build Command</label>
-                        <input type="text" class="form-control" id="build_command" name="build_command" placeholder="Optional">
+                        <input type="text" class="form-control" id="build_command" name="build_command" placeholder="Optional" value="{{ form.build_command.value|default:'' }}">
                         <div class="form-text">Optional. Example: npm install && npm run build</div>
+                        {% if form.build_command.errors %}
+                        <div class="text-danger small">{{ form.build_command.errors|join:', ' }}</div>
+                        {% endif %}
                     </div>
 
                     <div class="mb-3">
                         <label for="run_command" class="form-label">Custom Run Command</label>
-                        <input type="text" class="form-control" id="run_command" name="run_command" placeholder="Optional">
+                        <input type="text" class="form-control" id="run_command" name="run_command" placeholder="Optional" value="{{ form.run_command.value|default:'' }}">
                         <div class="form-text">Optional. If empty, container will run the built image's default CMD</div>
+                        {% if form.run_command.errors %}
+                        <div class="text-danger small">{{ form.run_command.errors|join:', ' }}</div>
+                        {% endif %}
                     </div>
 
                     <div class="mb-3">
                         <label for="env_vars" class="form-label">Environment Variables</label>
-                        <textarea class="form-control" id="env_vars" name="env_vars" rows="5" placeholder="KEY=VALUE\nANOTHER_KEY=another_value"></textarea>
+                        <textarea class="form-control" id="env_vars" name="env_vars" rows="5" placeholder="KEY=VALUE\nANOTHER_KEY=another_value">{{ form.env_vars.value|default:'' }}</textarea>
                         <div class="form-text">One per line in KEY=VALUE format. Lines starting with # are ignored.</div>
+                        {% if form.env_vars.errors %}
+                        <div class="text-danger small">{{ form.env_vars.errors|join:', ' }}</div>
+                        {% endif %}
                     </div>
                     
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                         <a href="{% url 'core:dashboard' %}" class="btn btn-secondary">Cancel</a>
+                        {% if has_github_connected %}
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-plus"></i> Create Project
                         </button>
+                        {% else %}
+                        <a href="{% url 'core:github_login' %}" class="btn btn-dark">
+                            <i class="bi bi-github"></i> ล็อกอิน GitHub เพื่อสร้าง
+                        </a>
+                        {% endif %}
                     </div>
                 </form>
             </div>

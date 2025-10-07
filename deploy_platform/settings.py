@@ -63,6 +63,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.github_connected',
             ],
         },
     },
@@ -134,7 +135,7 @@ LOGOUT_REDIRECT_URL = '/'
 
 # GitHub OAuth Settings
 GITHUB_CLIENT_ID = 'Ov23liDBqBoJA5motUgG'
-GITHUB_CLIENT_SECRET = 'eb1a57dd78a98c8dd584d5743537b932baae4b8d'
+GITHUB_CLIENT_SECRET = '100d4a956460db2e54ac8bc0980dcdfe40eafb18'
 GITHUB_REDIRECT_URI = 'http://localhost:8000/github/callback/'
 
 # Login/Logout URLs

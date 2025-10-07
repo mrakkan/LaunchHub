@@ -5,9 +5,15 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1> สวัสดี, {{ user.get_full_name|default:user.username }}</h1>
+    {% if has_github_connected %}
     <a href="{% url 'core:create_project' %}" class="btn btn-primary">
         <i class="bi bi-plus-circle"></i> New Project
     </a>
+    {% else %}
+    <a href="{% url 'core:github_login' %}" class="btn btn-dark">
+        <i class="bi bi-github"></i> ล็อกอิน GitHub เพื่อสร้าง
+    </a>
+    {% endif %}
 </div>
 
 <div class="row">
@@ -111,7 +117,11 @@
                 <div class="text-center py-4">
                     <i class="bi bi-inbox display-4 text-muted"></i>
                     <p class="text-muted mt-2">No deployments yet</p>
+                    {% if has_github_connected %}
                     <a href="{% url 'core:create_project' %}" class="btn btn-primary">Create your first project</a>
+                    {% else %}
+                    <a href="{% url 'core:github_login' %}" class="btn btn-dark"><i class="bi bi-github"></i> ล็อกอิน GitHub เพื่อสร้าง</a>
+                    {% endif %}
                 </div>
                 {% endif %}
             </div>
@@ -146,7 +156,11 @@
                 <div class="text-center py-4">
                     <i class="bi bi-folder-x display-4 text-muted"></i>
                     <p class="text-muted mt-2">No projects yet</p>
+                    {% if has_github_connected %}
                     <a href="{% url 'core:create_project' %}" class="btn btn-primary">Create Project</a>
+                    {% else %}
+                    <a href="{% url 'core:github_login' %}" class="btn btn-dark"><i class="bi bi-github"></i> ล็อกอิน GitHub เพื่อสร้าง Project</a>
+                    {% endif %}
                 </div>
                 {% endif %}
             </div>

@@ -56,6 +56,9 @@ class Project(models.Model):
     webhook_enabled = models.BooleanField(default=False)
     webhook_token = models.CharField(max_length=64, blank=True)
     webhook_branch = models.CharField(max_length=100, default='main', blank=True)
+    # Maintain DB compatibility: some databases have a NOT NULL 'container_port'
+    # We always expose container port 80 in Docker mapping, so set default=80
+    container_port = models.IntegerField(default=80)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='projects')

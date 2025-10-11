@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
-import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -134,10 +133,10 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/'
 
-# GitHub OAuth Settings (override via environment in production)
-GITHUB_CLIENT_ID = os.environ.get('GITHUB_CLIENT_ID', 'Ov23liDBqBoJA5motUgG')
-GITHUB_CLIENT_SECRET = os.environ.get('GITHUB_CLIENT_SECRET', '100d4a956460db2e54ac8bc0980dcdfe40eafb18')
-GITHUB_REDIRECT_URI = os.environ.get('GITHUB_REDIRECT_URI', 'http://54.90.213.66//github/callback/')
+# GitHub OAuth Settings
+GITHUB_CLIENT_ID = 'Ov23liDBqBoJA5motUgG'
+GITHUB_CLIENT_SECRET = '100d4a956460db2e54ac8bc0980dcdfe40eafb18'
+GITHUB_REDIRECT_URI = 'http://54.90.213.66/github/callback/'
 
 # Login/Logout URLs
 LOGIN_REDIRECT_URL = '/dashboard/'

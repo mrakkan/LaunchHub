@@ -28,8 +28,10 @@ services:
     volumes:
       - staticfiles:/app/staticfiles
       - media:/app/media
-    env_file:
-      - .env
+    environment:
+      GITHUB_CLIENT_ID: "Ov23liDBqBoJA5motUgG"
+      GITHUB_CLIENT_SECRET: "100d4a956460db2e54ac8bc0980dcdfe40eafb18"
+      GITHUB_REDIRECT_URI: "http://54.90.213.66/github/callback/"
     command: >
       bash -lc "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     restart: unless-stopped

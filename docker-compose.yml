@@ -24,7 +24,7 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "80:8000"  # expose app on port 80 for public access
+      - "8080:8000"  # use host 8080 to avoid Nginx port 80 conflict
     volumes:
       - staticfiles:/app/staticfiles
       - media:/app/media

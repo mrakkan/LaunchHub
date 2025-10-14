@@ -13,34 +13,12 @@ document.addEventListener('DOMContentLoaded', function() {
         return new bootstrap.Popover(popoverTriggerEl);
     });
 
-    // Project status indicators
-    updateProjectStatuses();
-
     // Deployment log auto-refresh
     setupDeploymentLogRefresh();
 
     // Form validations
     setupFormValidations();
 });
-
-// Update project status indicators
-function updateProjectStatuses() {
-    const statusElements = document.querySelectorAll('.project-status');
-    
-    statusElements.forEach(element => {
-        const status = element.getAttribute('data-status');
-        if (status === 'running') {
-            element.classList.add('status-running');
-            element.innerHTML = '<i class="fas fa-check-circle"></i> Running';
-        } else if (status === 'deploying') {
-            element.classList.add('status-deploying');
-            element.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deploying';
-        } else if (status === 'failed') {
-            element.classList.add('status-failed');
-            element.innerHTML = '<i class="fas fa-exclamation-circle"></i> Failed';
-        }
-    });
-}
 
 // Setup auto-refresh for deployment logs
 function setupDeploymentLogRefresh() {
@@ -100,63 +78,6 @@ function setupFormValidations() {
             form.classList.add('was-validated');
         }, false);
     });
-}
-
-// Copy to clipboard functionality
-function copyToClipboard(text, buttonElement) {
-    navigator.clipboard.writeText(text).then(() => {
-        const originalText = buttonElement.innerHTML;
-        buttonElement.innerHTML = '<i class="fas fa-check"></i> Copied!';
-        
-        setTimeout(() => {
-            buttonElement.innerHTML = originalText;
-        }, 2000);
-    }).catch(err => {
-        console.error('Failed to copy text: ', err);
-    });
-}
-
-// Toggle project visibility (public/private)
-function toggleProjectVisibility(projectId, button) {
-    const isPublic = button.getAttribute('data-public') === 'true';
-    const newStatus = !isPublic;
-    
-    fetch(`/api/projects/${projectId}/toggle-visibility/`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
-        },
-        body: JSON.stringify({ is_public: newStatus })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            button.setAttribute('data-public', newStatus.toString());
-            button.innerHTML = newStatus ? 
-                '<i class="fas fa-eye"></i> Make Private' : 
-                '<i class="fas fa-eye-slash"></i> Make Public';
-            
-            // Show success message
-            const messageContainer = document.getElementById('messages');
-            if (messageContainer) {
-                const alert = document.createElement('div');
-                alert.className = 'alert alert-success alert-dismissible fade show';
-                alert.innerHTML = `
-                    Project visibility updated to ${newStatus ? 'public' : 'private'}.
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                `;
-                messageContainer.appendChild(alert);
-                
-                // Auto-dismiss after 3 seconds
-                setTimeout(() => {
-                    alert.classList.remove('show');
-                    setTimeout(() => alert.remove(), 150);
-                }, 3000);
-            }
-        }
-    })
-    .catch(error => console.error('Error toggling project visibility:', error));
 }
 
 // Get CSRF token from cookies

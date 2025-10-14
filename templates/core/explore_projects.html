@@ -42,14 +42,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     let searchTimeout;
     
-    // Function to perform search with debounce
+    
     function performSearch() {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(() => {
             const searchQuery = projectSearch.value;
             const tagQuery = tagSearch.value;
             
-            // Build URL with query parameters
+            
             let url = '{% url "core:explore_projects" %}?';
             if (searchQuery) {
                 url += `q=${encodeURIComponent(searchQuery)}&`;
@@ -58,21 +58,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 url += `tag=${encodeURIComponent(tagQuery)}`;
             }
             
-            // Fetch results
+            
             fetch(url)
                 .then(response => response.text())
                 .then(html => {
-                    // Create a temporary element to parse the HTML
+                    
                     const tempDiv = document.createElement('div');
                     tempDiv.innerHTML = html;
                     
-                    // Extract the projects container
+                    
                     const newProjectsContainer = tempDiv.querySelector('.row.g-3');
                     if (newProjectsContainer) {
                         projectsContainer.innerHTML = newProjectsContainer.innerHTML;
                     }
                     
-                    // Update tag filter info if needed
+                    
                     const newTagFilterInfo = tempDiv.querySelector('#tagFilterInfo');
                     if (newTagFilterInfo) {
                         const isVisible = !newTagFilterInfo.classList.contains('d-none');
@@ -88,18 +88,18 @@ document.addEventListener('DOMContentLoaded', function() {
                         tagFilterInfo.classList.add('d-none');
                     }
                     
-                    // Re-attach event listeners to new elements
+                    
                     attachEventListeners();
                 })
                 .catch(error => console.error('Error fetching search results:', error));
         }, 300); // 300ms debounce
     }
     
-    // Attach event listeners to search inputs
+    
     projectSearch.addEventListener('input', performSearch);
     tagSearch.addEventListener('input', performSearch);
     
-    // Clear tag filter
+    
     clearTagFilter.addEventListener('click', function(e) {
         e.preventDefault();
         tagSearch.value = '';
@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
         performSearch();
     });
     
-    // Function to attach event listeners to dynamic elements
+    
     function attachEventListeners() {
         // Add any event listeners for dynamically loaded content here
     }
@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </a>
                 </p>
                 
-                <!-- Project Tags -->
+                
                 <div class="mb-2">
                     {% for tag in project.tags.all %}
                         <a href="{% url 'core:explore_projects' %}?tag={{ tag.slug }}" class="badge bg-info text-decoration-none">

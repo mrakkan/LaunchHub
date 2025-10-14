@@ -79,7 +79,7 @@
                         </div>
                     </div>
 
-                    <!-- Advanced build & run settings -->
+                    
                     <div class="mb-3">
                         <label for="dockerfile_path" class="form-label">Dockerfile Path</label>
                         <input type="text" class="form-control" id="dockerfile_path" name="dockerfile_path" placeholder="Dockerfile" value="{{ form.dockerfile_path.value|default:'' }}">
@@ -136,7 +136,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- GitHub connect modal -->
+
 <div class="modal fade" id="githubConnectModal" tabindex="-1" aria-labelledby="githubConnectLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -159,7 +159,7 @@
  </div>
 
 <script>
-// Auto-generate project name from GitHub URL
+ 
 const repoUrlInput = document.getElementById('github_repo_url');
 const nameInput = document.getElementById('name');
 
@@ -173,7 +173,7 @@ repoUrlInput.addEventListener('blur', function() {
     }
 });
 
-// If user selects from dropdown, fill URL and name
+ 
 const repoSelect = document.getElementById('repo_select');
 if (repoSelect) {
     repoSelect.addEventListener('change', function() {
@@ -189,7 +189,7 @@ if (repoSelect) {
     });
 }
 
-// Show GitHub connect modal if required
+ 
 document.addEventListener('DOMContentLoaded', function() {
   const requireGithub = {{ require_github|yesno:'true,false' }};
   if (requireGithub) {

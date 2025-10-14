@@ -87,7 +87,7 @@
                     <i class="bi bi-github"></i> {{ project.github_repo_url|truncatechars:40 }}
                 </a></p>
                 
-                <!-- Project Tags -->
+                
                 <h6 class="mt-3">Tags:</h6>
                 <div class="d-flex flex-wrap gap-1 mb-2">
                     {% for tag in project.tags.all %}
@@ -109,11 +109,11 @@
             </div>
         </div>
         
-        <!-- Environment Variables card removed; managed via Project JSON only -->
+        
     </div>
     
     <div class="col-md-8">
-        <!-- Deployment History -->
+        
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0"><i class="bi bi-clock-history"></i> Deployment History</h5>
@@ -178,12 +178,12 @@
     </div>
 </div>
 
-<!-- Environment Variable modal removed -->
+
 {% endblock %}
 
 {% block scripts %}
 <script>
-// Deploy project
+ 
 document.querySelectorAll('.deploy-project').forEach(button => {
     button.addEventListener('click', function() {
         const projectId = this.dataset.projectId;
@@ -218,7 +218,7 @@ document.querySelectorAll('.deploy-project').forEach(button => {
     });
 });
 
-// Stop project
+ 
 document.querySelectorAll('.stop-project').forEach(button => {
     button.addEventListener('click', function() {
         const projectId = this.dataset.projectId;
@@ -252,7 +252,7 @@ document.querySelectorAll('.stop-project').forEach(button => {
     });
 });
 
-// Delete project
+ 
 document.querySelectorAll('.delete-project').forEach(button => {
     button.addEventListener('click', function() {
         const projectId = this.dataset.projectId;
@@ -288,7 +288,7 @@ document.querySelectorAll('.delete-project').forEach(button => {
     });
 });
 
-// Add tag
+ 
 document.getElementById('addTagForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const projectId = this.querySelector('input[name="project_id"]').value;
@@ -314,7 +314,7 @@ document.getElementById('addTagForm').addEventListener('submit', function(e) {
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
-            // Add new tag to the list
+            
             const tagsContainer = document.querySelector('.d-flex.flex-wrap.gap-1.mb-2');
             const emptyMessage = tagsContainer.querySelector('.text-muted');
             if (emptyMessage) {
@@ -331,11 +331,11 @@ document.getElementById('addTagForm').addEventListener('submit', function(e) {
             `;
             tagsContainer.appendChild(newTag);
             
-            // Add event listener to the new remove button
+            
             const newRemoveBtn = newTag.querySelector('.remove-tag');
             addRemoveTagListener(newRemoveBtn);
             
-            // Clear input
+            
             this.querySelector('input[name="tag_name"]').value = '';
         } else {
             alert('Failed to add tag: ' + data.message);
@@ -350,7 +350,7 @@ document.getElementById('addTagForm').addEventListener('submit', function(e) {
     });
 });
 
-// Remove tag
+ 
 function addRemoveTagListener(element) {
     element.addEventListener('click', function(e) {
         e.preventDefault();
@@ -374,7 +374,7 @@ function addRemoveTagListener(element) {
             if (data.status === 'success') {
                 tagElement.remove();
                 
-                // If no tags left, show empty message
+                
                 const tagsContainer = document.querySelector('.d-flex.flex-wrap.gap-1.mb-2');
                 if (tagsContainer.children.length === 0) {
                     tagsContainer.innerHTML = '<span class="text-muted">No tags</span>';
@@ -389,7 +389,7 @@ function addRemoveTagListener(element) {
     });
 }
 
-// Add listeners to existing remove tag buttons
+ 
 document.querySelectorAll('.remove-tag').forEach(button => {
     addRemoveTagListener(button);
 });

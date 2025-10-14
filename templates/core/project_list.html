@@ -114,7 +114,7 @@
     </div>
 </div>
 
-<!-- Public Projects Section -->
+
 <div class="row mt-5">
     <div class="col-12">
         <div class="card">
@@ -137,7 +137,7 @@
 
 {% block scripts %}
 <script>
-// Deploy project
+ 
 document.querySelectorAll('.deploy-project').forEach(button => {
     button.addEventListener('click', function() {
         const projectId = this.dataset.projectId;
@@ -172,7 +172,7 @@ document.querySelectorAll('.deploy-project').forEach(button => {
     });
 });
 
-// Stop project
+ 
 document.querySelectorAll('.stop-project').forEach(button => {
     button.addEventListener('click', function() {
         const projectId = this.dataset.projectId;
@@ -206,7 +206,7 @@ document.querySelectorAll('.stop-project').forEach(button => {
     });
 });
 
-// Delete project
+ 
 document.querySelectorAll('.delete-project').forEach(button => {
     button.addEventListener('click', function() {
         const projectId = this.dataset.projectId;

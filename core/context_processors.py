@@ -1,7 +1,6 @@
 from .models import SocialAccount
 
 def github_connected(request):
-    """Provide a global flag indicating whether the current user connected GitHub."""
     is_connected = False
     user = getattr(request, 'user', None)
     if user and user.is_authenticated:

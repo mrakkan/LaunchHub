@@ -214,6 +214,34 @@ class Project(models.Model):
             if not os.path.exists(dockerfile_path):
                 raise Exception(f"Dockerfile not found at {self.dockerfile_path}")
 
+            # Detect container port from Dockerfile EXPOSE if available; fallback to model's container_port
+            detected_container_port = None
+            try:
+                with open(dockerfile_path, 'r', encoding='utf-8', errors='ignore') as df:
+                    for line in df:
+                        line = line.strip()
+                        if line.upper().startswith('EXPOSE'):
+                            # Example formats: "EXPOSE 3000", "EXPOSE 3000/tcp", "EXPOSE 3000 8080"
+                            parts = line.split()
+                            for token in parts[1:]:
+                                token = token.strip()
+                                # strip protocol suffix
+                                token = token.split('/')[0] if '/' in token else token
+                                try:
+                                    port_val = int(token)
+                                    if 1 <= port_val <= 65535:
+                                        detected_container_port = port_val
+                                        break
+                                except ValueError:
+                                    continue
+                            if detected_container_port:
+                                break
+            except Exception:
+                detected_container_port = None
+
+            container_port = detected_container_port or (self.container_port or 80)
+            append_log(f"Using container internal port: {container_port}")
+
             # Build Docker image (stream logs)
             image_name = f"{repo_name}_{self.id}".lower()
             self.docker_image_name = image_name
@@ -245,7 +273,7 @@ class Project(models.Model):
             # Remove any stale staging container with the same name
             subprocess.run(['docker', 'rm', '-f', staging_name], capture_output=True)
 
-            staging_cmd = ['docker', 'run', '-d', '-p', f"{staging_port}:80"]
+            staging_cmd = ['docker', 'run', '-d', '-p', f"{staging_port}:{container_port}"]
             for key, value in env_vars.items():
                 staging_cmd.extend(['-e', f"{key}={value}"])
             staging_cmd.extend(['--name', staging_name])
@@ -289,7 +317,7 @@ class Project(models.Model):
             # Ensure temp name not in use
             subprocess.run(['docker', 'rm', '-f', new_name], capture_output=True)
 
-            final_cmd = ['docker', 'run', '-d', '-p', f"{self.exposed_port}:80"]
+            final_cmd = ['docker', 'run', '-d', '-p', f"{self.exposed_port}:{container_port}"]
             for key, value in env_vars.items():
                 final_cmd.extend(['-e', f"{key}={value}"])
             final_cmd.extend(['--name', new_name])

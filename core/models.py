@@ -11,6 +11,7 @@ import tempfile
 import shutil
 import time
 import urllib.request
+import urllib.error
 
 
 class Tag(models.Model):
@@ -51,7 +52,7 @@ class Project(models.Model):
     dockerfile_path = models.CharField(max_length=200, default='Dockerfile')
     build_command = models.CharField(max_length=200, blank=True, help_text="Custom build command if needed")
     run_command = models.CharField(max_length=200, blank=True, help_text="Custom run command if needed")
-    environment_variables = models.TextField(blank=True, help_text="JSON format environment variables")
+    environment_variables = models.TextField(blank=True, help_text="Environment variables in JSON or KEY=VALUE lines")
     # webhook settings
     webhook_enabled = models.BooleanField(default=False)
     webhook_token = models.CharField(max_length=64, blank=True)
@@ -113,14 +114,14 @@ class Project(models.Model):
                     if qs.exists():
                         errors['exposed_port'] = ['This port is already used by another project']
 
-        # environment_variables should be valid JSON object if provided
+        # environment_variables should be valid (JSON object or KEY=VALUE lines)
         if self.environment_variables:
             try:
-                parsed = json.loads(self.environment_variables)
+                parsed = self.get_env_variables()
                 if not isinstance(parsed, dict):
-                    errors['environment_variables'] = ['Environment variables must be a JSON object']
+                    errors['environment_variables'] = ['Environment variables must be a JSON object or KEY=VALUE lines']
             except Exception:
-                errors['environment_variables'] = ['Environment variables must be valid JSON']
+                errors['environment_variables'] = ['Environment variables must be valid JSON or KEY=VALUE lines']
 
         if errors:
             raise ValidationError(errors)
@@ -134,11 +135,36 @@ class Project(models.Model):
         return port
     
     def get_env_variables(self):
-        """Parse environment variables from JSON"""
-        try:
-            return json.loads(self.environment_variables) if self.environment_variables else {}
-        except json.JSONDecodeError:
+        """Parse environment variables from JSON or KEY=VALUE lines.
+        - JSON: expects an object, e.g., {"KEY":"VALUE"}
+        - Lines: one per line, KEY=VALUE; lines starting with # ignored.
+        """
+        raw = self.environment_variables or ''
+        raw = raw.strip()
+        if not raw:
             return {}
+        # Try JSON first if it looks like JSON
+        if raw.startswith('{'):
+            try:
+                parsed = json.loads(raw)
+                return parsed if isinstance(parsed, dict) else {}
+            except Exception:
+                # fall through to line parsing
+                pass
+        # Parse KEY=VALUE lines
+        env = {}
+        for line in raw.splitlines():
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+            if '=' not in line:
+                continue
+            key, value = line.split('=', 1)
+            key = key.strip()
+            value = value.strip()
+            if key:
+                env[key] = value
+        return env
     
     def deploy_with_docker(self, deployment):
         """Deploy project using Docker with minimal-downtime (blue-green):
@@ -264,6 +290,9 @@ class Project(models.Model):
 
             # Prepare env
             env_vars = self.get_env_variables()
+            # Ensure common defaults for containerized apps
+            env_vars.setdefault('HOST', '0.0.0.0')
+            env_vars.setdefault('PORT', str(container_port))
 
             # Run STAGING container on a temporary free port
             staging_port = self.get_next_available_port()
@@ -290,17 +319,56 @@ class Project(models.Model):
             # Health check the staging container
             append_log("Health checking staging container...")
             healthy = False
-            staging_url = f"http://localhost:{staging_port}/"
-            for _ in range(30):
-                try:
-                    with urllib.request.urlopen(staging_url, timeout=2):
-                        healthy = True
-                        break
-                except Exception:
-                    time.sleep(2)
+            # Allow custom healthcheck path via env; fallback to common paths
+            health_paths = []
+            hc_path = env_vars.get('HEALTHCHECK_PATH')
+            if isinstance(hc_path, str) and hc_path.strip():
+                health_paths = [hc_path.strip()]
+            else:
+                health_paths = ['/', '/health', '/status', '/api/health', '/api/status', '/ping']
+            # retries and interval configurable
+            try:
+                max_attempts = int(env_vars.get('HEALTHCHECK_RETRIES', 45))
+            except Exception:
+                max_attempts = 45
+            try:
+                interval = float(env_vars.get('HEALTHCHECK_INTERVAL', 2))
+            except Exception:
+                interval = 2
+            for _ in range(max_attempts):
+                for path in health_paths:
+                    path = path if path.startswith('/') else '/' + path
+                    staging_url = f"http://localhost:{staging_port}{path}"
+                    try:
+                        with urllib.request.urlopen(staging_url, timeout=2) as resp:
+                            status = resp.getcode()
+                        if 200 <= int(status) < 400:
+                            healthy = True
+                            break
+                    except urllib.error.HTTPError as he:
+                        # treat 2xx/3xx as healthy; others keep trying
+                        try:
+                            code = int(getattr(he, 'code', 0))
+                        except Exception:
+                            code = 0
+                        if 200 <= code < 400:
+                            healthy = True
+                            break
+                    except Exception:
+                        pass
+                if healthy:
+                    break
+                time.sleep(interval)
             if not healthy:
+                # Show last logs from staging container to help diagnose
+                logs = subprocess.run(['docker', 'logs', '--tail', '100', staging_container_id], capture_output=True, text=True)
+                if logs.stdout:
+                    append_log("[staging logs]" + ("\n" + logs.stdout))
+                if logs.stderr:
+                    append_log("[staging logs:stderr]" + ("\n" + logs.stderr))
                 subprocess.run(['docker', 'rm', '-f', staging_container_id], capture_output=True)
-                append_log(f"Staging container failed health check on {staging_url}")
+                tried = ', '.join(health_paths)
+                append_log(f"Staging container failed health check on http://localhost:{staging_port} (paths tried: {tried})")
                 raise Exception("Staging health check failed")
             append_log("Staging container is healthy")
 

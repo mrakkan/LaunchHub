@@ -335,23 +335,36 @@ class Project(models.Model):
                 interval = float(env_vars.get('HEALTHCHECK_INTERVAL', 2))
             except Exception:
                 interval = 2
+            # Accept 4xx as healthy if configured (many apps return 404 on root)
+            accept_4xx = str(env_vars.get('HEALTHCHECK_ACCEPT_4XX', 'false')).lower() in ('1','true','yes','on')
+            # Custom full URL support
+            hc_full_url = str(env_vars.get('HEALTHCHECK_URL', '')).strip()
+            # Candidate hosts: prefer host.docker.internal so web container can reach host-published port
+            hc_host = str(env_vars.get('HEALTHCHECK_HOST', '')).strip()
+            base_hosts = [hc_host] if hc_host else ['host.docker.internal', 'localhost']
             for _ in range(max_attempts):
-                for path in health_paths:
-                    path = path if path.startswith('/') else '/' + path
-                    staging_url = f"http://localhost:{staging_port}{path}"
+                # Build URLs to try
+                urls_to_try = []
+                if hc_full_url.startswith('http://') or hc_full_url.startswith('https://'):
+                    urls_to_try = [hc_full_url]
+                else:
+                    for host in base_hosts:
+                        for path in health_paths:
+                            path = path if path.startswith('/') else '/' + path
+                            urls_to_try.append(f"http://{host}:{staging_port}{path}")
+                for staging_url in urls_to_try:
                     try:
-                        with urllib.request.urlopen(staging_url, timeout=2) as resp:
-                            status = resp.getcode()
-                        if 200 <= int(status) < 400:
+                        with urllib.request.urlopen(staging_url, timeout=3) as resp:
+                            status = int(resp.getcode())
+                        if (200 <= status < 400) or (accept_4xx and 400 <= status < 500):
                             healthy = True
                             break
                     except urllib.error.HTTPError as he:
-                        # treat 2xx/3xx as healthy; others keep trying
                         try:
                             code = int(getattr(he, 'code', 0))
                         except Exception:
                             code = 0
-                        if 200 <= code < 400:
+                        if (200 <= code < 400) or (accept_4xx and 400 <= code < 500):
                             healthy = True
                             break
                     except Exception:
@@ -359,6 +372,33 @@ class Project(models.Model):
                 if healthy:
                     break
                 time.sleep(interval)
+            # TCP fallback: consider port open as healthy if configured (default true)
+            if not healthy:
+                tcp_enabled = str(env_vars.get('HEALTHCHECK_TCP', 'true')).lower() in ('1','true','yes','on')
+                if tcp_enabled:
+                    import socket
+                    try:
+                        tcp_attempts = int(env_vars.get('HEALTHCHECK_TCP_RETRIES', 10))
+                    except Exception:
+                        tcp_attempts = 10
+                    try:
+                        tcp_interval = float(env_vars.get('HEALTHCHECK_TCP_INTERVAL', 1))
+                    except Exception:
+                        tcp_interval = 1
+                    for _ in range(tcp_attempts):
+                        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                        s.settimeout(2)
+                        try:
+                            s.connect(('host.docker.internal', staging_port))
+                            s.close()
+                            healthy = True
+                            break
+                        except Exception:
+                            try:
+                                s.close()
+                            except Exception:
+                                pass
+                            time.sleep(tcp_interval)
             if not healthy:
                 # Show last logs from staging container to help diagnose
                 logs = subprocess.run(['docker', 'logs', '--tail', '100', staging_container_id], capture_output=True, text=True)
@@ -368,7 +408,7 @@ class Project(models.Model):
                     append_log("[staging logs:stderr]" + ("\n" + logs.stderr))
                 subprocess.run(['docker', 'rm', '-f', staging_container_id], capture_output=True)
                 tried = ', '.join(health_paths)
-                append_log(f"Staging container failed health check on http://localhost:{staging_port} (paths tried: {tried})")
+                append_log(f"Staging container failed health check on host.docker.internal:{staging_port} (paths tried: {tried})")
                 raise Exception("Staging health check failed")
             append_log("Staging container is healthy")
 

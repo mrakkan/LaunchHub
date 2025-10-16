@@ -29,6 +29,8 @@ services:
       - staticfiles:/app/staticfiles
       - media:/app/media
       - /var/run/docker.sock:/var/run/docker.sock
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       GITHUB_CLIENT_ID: "Ov23liDBqBoJA5motUgG"
       GITHUB_CLIENT_SECRET: "100d4a956460db2e54ac8bc0980dcdfe40eafb18"

@@ -13,7 +13,7 @@
             <button class="btn btn-warning stop-project" data-project-id="{{ project.id }}">
                 <i class="bi bi-stop-circle"></i> Stop
             </button>
-            <a href="http://localhost:{{ project.exposed_port }}" target="_blank" class="btn btn-success">
+            <a href="{{ project.get_preview_url }}" target="_blank" class="btn btn-success">
                 <i class="bi bi-box-arrow-up-right"></i> Open App
             </a>
         {% else %}

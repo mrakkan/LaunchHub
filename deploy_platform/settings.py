@@ -154,3 +154,7 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Public base URL for preview links (e.g., http://<Elastic-IP>)
+# If set, preview links will use this host instead of localhost.
+PUBLIC_BASE_URL = os.environ.get('PUBLIC_BASE_URL', '')

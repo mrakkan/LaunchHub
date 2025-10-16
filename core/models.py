@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.template.defaultfilters import slugify
 from django.core.exceptions import ValidationError
+from django.conf import settings
 import uuid
 import subprocess
 import os
@@ -541,6 +542,10 @@ class Project(models.Model):
         # First verify container is actually running
         is_running = self.check_container_status()
         if is_running and self.exposed_port:
+            base = getattr(settings, 'PUBLIC_BASE_URL', '') or os.environ.get('PUBLIC_BASE_URL', '')
+            if base:
+                base = base.rstrip('/')
+                return f"{base}:{self.exposed_port}/"
             return f"http://localhost:{self.exposed_port}/"
         return ""
 

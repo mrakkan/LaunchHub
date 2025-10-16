@@ -137,10 +137,10 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/'
 
-# GitHub OAuth Settings
-GITHUB_CLIENT_ID = 'Ov23liDBqBoJA5motUgG'
-GITHUB_CLIENT_SECRET = '100d4a956460db2e54ac8bc0980dcdfe40eafb18'
-GITHUB_REDIRECT_URI = 'http://54.90.213.66/github/callback/'
+# GitHub OAuth Settings (read from environment)
+GITHUB_CLIENT_ID = os.environ.get('GITHUB_CLIENT_ID', 'Ov23liDBqBoJA5motUgG')
+GITHUB_CLIENT_SECRET = os.environ.get('GITHUB_CLIENT_SECRET', '100d4a956460db2e54ac8bc0980dcdfe40eafb18')
+GITHUB_REDIRECT_URI = os.environ.get('GITHUB_REDIRECT_URI', 'http://98.89.44.75/github/callback/')
 
 # Login/Logout URLs
 LOGIN_REDIRECT_URL = '/dashboard/'

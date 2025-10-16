@@ -32,6 +32,13 @@ services:
       GITHUB_CLIENT_ID: "Ov23liDBqBoJA5motUgG"
       GITHUB_CLIENT_SECRET: "100d4a956460db2e54ac8bc0980dcdfe40eafb18"
       GITHUB_REDIRECT_URI: "http://54.90.213.66/github/callback/"
+      # RDS database connection (override local db)
+      DB_NAME: "easydeploy"
+      DB_USER: "postgres"
+      DB_PASSWORD: "Minimax999157"
+      DB_HOST: "database-1.c728eaaievd3.us-east-1.rds.amazonaws.com"
+      DB_PORT: "5432"
+      DB_SSLMODE: "require"
     command: >
       bash -lc "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     restart: unless-stopped

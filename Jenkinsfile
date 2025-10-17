@@ -24,7 +24,7 @@ pipeline {
       echo 'Pipeline finished.'
     }
     failure {
-      echo 'Deployment failed. ตรวจ Jenkins console และ docker compose logs'
+      echo 'Deployment failed. ตรวจ Jenkins console และ docker compose logs เพื่อหา error message'
     }
   }
 }

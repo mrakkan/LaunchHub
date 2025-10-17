@@ -322,7 +322,35 @@ def create_project(request):
 
         form = ProjectForm(request.POST, user=request.user)
         if form.is_valid():
-            project = form.save()
+            try:
+                project = form.save()
+            except Exception as e:
+                messages.error(request, f'ไม่สามารถกำหนดพอร์ตอัตโนมัติได้ (ช่วง 5000–5019): {e}')
+                # If error during save, re-fetch repos for better UX
+                github_repos = []
+                try:
+                    acct = SocialAccount.objects.filter(user=request.user, provider='github').first()
+                    if acct and acct.extra_data.get('access_token'):
+                        token = acct.extra_data.get('access_token')
+                        headers = {
+                            'Authorization': f'token {token}',
+                            'Accept': 'application/vnd.github+json'
+                        }
+                        try:
+                            resp = requests.get('https://api.github.com/user/repos?per_page=50&sort=updated', headers=headers, timeout=10)
+                            if resp.status_code == 200:
+                                github_repos = resp.json()
+                        except Exception:
+                            github_repos = []
+                except Exception:
+                    github_repos = []
+
+                return render(request, 'core/create_project.html', {
+                    'has_github_connected': True,
+                    'github_repos': github_repos,
+                    'require_github': False,
+                    'form': form,
+                })
             messages.success(request, 'Project created successfully!')
             return redirect('core:project_detail', project_id=project.id)
 

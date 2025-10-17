@@ -13,6 +13,7 @@ import shutil
 import time
 import urllib.request
 import urllib.error
+import socket
 
 
 class Tag(models.Model):
@@ -127,13 +128,46 @@ class Project(models.Model):
         if errors:
             raise ValidationError(errors)
     
+    def _is_port_free(self, port: int) -> bool:
+        """Quick check if a TCP port is free on the host.
+        Attempts to bind to 0.0.0.0:<port> and immediately releases it.
+        Returns True if bind succeeds, otherwise False.
+        """
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            s.bind(('0.0.0.0', port))
+            return True
+        except OSError:
+            return False
+        finally:
+            try:
+                s.close()
+            except Exception:
+                pass
+    
     def get_next_available_port(self):
-        """Get next available port starting from 3000"""
-        used_ports = Project.objects.exclude(exposed_port__isnull=True).values_list('exposed_port', flat=True)
-        port = 3000
-        while port in used_ports:
-            port += 1
-        return port
+        """Pick the first available port in the range 5000-5019.
+        Checks both DB-assigned ports and whether the OS currently has the port in use.
+        If all ports are taken, raises a RuntimeError.
+        """
+        allowed_ports = list(range(5000, 5020))
+        # Ports already assigned to any project
+        used_by_projects = set(
+            Project.objects.exclude(exposed_port__isnull=True).values_list('exposed_port', flat=True)
+        )
+        # First pass: port not used in DB and free on host
+        for p in allowed_ports:
+            if p in used_by_projects:
+                continue
+            if self._is_port_free(p):
+                return p
+        # Fallback: pick first not used in DB (OS check might be unreliable in some environments)
+        for p in allowed_ports:
+            if p not in used_by_projects:
+                return p
+        # No ports free in range
+        raise RuntimeError('No available port in the 5000-5019 range')
     
     def get_env_variables(self):
         """Parse environment variables from JSON or KEY=VALUE lines.
@@ -377,7 +411,7 @@ class Project(models.Model):
             if not healthy:
                 tcp_enabled = str(env_vars.get('HEALTHCHECK_TCP', 'true')).lower() in ('1','true','yes','on')
                 if tcp_enabled:
-                    import socket
+                    import socket as _socket
                     try:
                         tcp_attempts = int(env_vars.get('HEALTHCHECK_TCP_RETRIES', 10))
                     except Exception:
@@ -387,7 +421,7 @@ class Project(models.Model):
                     except Exception:
                         tcp_interval = 1
                     for _ in range(tcp_attempts):
-                        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                        s = _socket.socket(_socket.AF_INET, _socket.SOCK_STREAM)
                         s.settimeout(2)
                         try:
                             s.connect(('host.docker.internal', staging_port))

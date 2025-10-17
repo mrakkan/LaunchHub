@@ -61,16 +61,6 @@
                     </div>
                     
                     <div class="mb-3">
-                        <label for="exposed_port" class="form-label">Port</label>
-                        <input type="number" class="form-control" id="exposed_port" name="exposed_port" 
-                               placeholder="3000" min="1" max="65535" value="{{ form.exposed_port.value|default_if_none:'' }}">
-                        <div class="form-text">Port number for your application (auto-assigned if empty)</div>
-                        {% if form.exposed_port.errors %}
-                        <div class="text-danger small">{{ form.exposed_port.errors|join:', ' }}</div>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="mb-3">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="is_public" name="is_public" {% if form.is_public.value %}checked{% endif %}>
                             <label class="form-check-label" for="is_public">

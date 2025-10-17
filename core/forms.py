@@ -35,13 +35,12 @@ class ProjectForm(forms.ModelForm):
     class Meta:
         model = Project
         fields = [
-            'name', 'github_repo_url', 'exposed_port', 'is_public',
+            'name', 'github_repo_url', 'is_public',
             'dockerfile_path', 'build_command', 'run_command',
         ]
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'github_repo_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://github.com/username/repository'}),
-            'exposed_port': forms.NumberInput(attrs={'class': 'form-control', 'min': 1, 'max': 65535, 'placeholder': '3000'}),
             'is_public': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'dockerfile_path': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Dockerfile'}),
             'build_command': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Optional'}),
@@ -64,20 +63,6 @@ class ProjectForm(forms.ModelForm):
         if len(parts) < 2 or not parts[0] or not parts[1]:
             raise ValidationError('Invalid GitHub repository URL format')
         return url
-
-    def clean_exposed_port(self):
-        port = self.cleaned_data.get('exposed_port')
-        if port is None:
-            return None
-        if port < 1 or port > 65535:
-            raise ValidationError('Port must be between 1 and 65535')
-        # Check uniqueness among user's projects
-        qs = Project.objects.exclude(exposed_port__isnull=True).filter(exposed_port=port)
-        if self.instance.pk:
-            qs = qs.exclude(pk=self.instance.pk)
-        if qs.exists():
-            raise ValidationError('This port is already used by another project')
-        return port
 
     def clean_name(self):
         name = (self.cleaned_data.get('name') or '').strip()
@@ -115,8 +100,8 @@ class ProjectForm(forms.ModelForm):
         # attach owner if provided via form initialization
         if self.user and not instance.owner_id:
             instance.owner = self.user
-        # If exposed_port not provided, auto-assign
-        if instance.exposed_port is None:
+        # Always auto-assign a port for new projects (no user choice)
+        if not instance.pk or instance.exposed_port is None:
             instance.exposed_port = instance.get_next_available_port()
         # Set environment_variables JSON from cleaned env_vars
         env_json = self.cleaned_data.get('env_vars', '')

@@ -13,7 +13,6 @@ pipeline {
         sh 'docker-compose pull || true'
         sh 'docker-compose build'
         sh 'docker-compose up -d --remove-orphans'
-        sh 'sudo systemctl reload nginx'
         sh 'docker-compose ps'
       }
     }

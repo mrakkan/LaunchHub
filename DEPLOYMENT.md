@@ -1,11 +1,11 @@
-AWS EC2 Deployment (One Command)
+AWS EC2 Deployment (RDS-backed)
 
-Goal: Run `docker compose up -d` on your EC2 instance and have the site publicly available at `http://<EC2-IP>/`.
+Goal: Run `docker compose up -d --build` on your EC2 instance and have the site available at `http://<EC2-IP>:8080/` (or via your ALB).
 
 Prerequisites
 - An EC2 instance (Amazon Linux 2 or Ubuntu 22.04 works well)
-- Security Group allows inbound `HTTP (80)` and `SSH (22)` from your IP
-- Git installed, or download the repo via ZIP
+- Security Group allows inbound `HTTP` to your chosen port (default host `8080`) and `SSH (22)` from your admin IP
+- RDS PostgreSQL instance reachable from the EC2 Security Group
 
 Install Docker and Docker Compose
 - Amazon Linux 2:
@@ -37,18 +37,22 @@ Install Docker and Docker Compose
 Deploy the App
 ```bash
 git clone <your-repo-url> && cd EasyDeploy
-docker compose up -d
+# Ensure RDS is reachable from EC2 SG and credentials are configured in Django settings
+# Optionally set SSL mode via env: DB_SSLMODE=require
+docker compose up -d --build
 ```
 
 What this does
-- Starts Postgres as `db` with credentials matching Django settings
-- Builds the web container, runs migrations, collects static, and serves via Gunicorn
-- Maps container port `8000` to host `80` so the app is available at `http://<EC2-IP>/`
+- Builds and starts the web container
+- Runs Django migrations against your RDS PostgreSQL
+- Serves the app via `runserver` on container port `8000`, mapped to host `8080`
 
 Open in Browser
-- Visit `http://<EC2-IP>/`
+- Visit `http://<EC2-IP>:8080/`
+- If behind an ALB, forward traffic to instance port `8080` (or adapt the mapping)
 
 Notes
-- GitHub OAuth: If you want to use login with GitHub on EC2, update your OAuth App's Authorization callback URL to `http://<EC2-IP>/github/callback/` in GitHub settings.
-- Static files: Collected to `/app/staticfiles` and served directly by the app. If you later add a domain and HTTPS, consider an Nginx reverse proxy.
-- Database: The DB runs inside Docker. To persist across restarts, we use the `pgdata` volume.
+- No local Postgres container is used; the app connects to your RDS instance.
+- Ensure your RDS Security Group allows inbound `TCP 5432` from the EC2 instance's Security Group.
+- `DB_SSLMODE` can be set via environment (default in settings is `prefer`). For production, use `require`.
+- Static files are stored in `/app/staticfiles` and served by the app. Consider an Nginx reverse proxy when adding a domain and HTTPS.

@@ -158,3 +158,12 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Public base URL for preview links (e.g., http://<Elastic-IP>)
 # If set, preview links will use this host instead of localhost.
 PUBLIC_BASE_URL = os.environ.get('PUBLIC_BASE_URL', '')
+
+# Remote SSH deploy settings (optional)
+REMOTE_DEPLOY_HOSTS = os.environ.get('REMOTE_DEPLOY_HOSTS', '')
+if REMOTE_DEPLOY_HOSTS:
+    REMOTE_DEPLOY_HOSTS = [h.strip() for h in REMOTE_DEPLOY_HOSTS.split(',') if h.strip()]
+else:
+    REMOTE_DEPLOY_HOSTS = []
+REMOTE_DEPLOY_SSH_USER = os.environ.get('REMOTE_DEPLOY_SSH_USER', '')
+REMOTE_DEPLOY_SSH_KEY_PATH = os.environ.get('REMOTE_DEPLOY_SSH_KEY_PATH', '')

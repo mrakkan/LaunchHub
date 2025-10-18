@@ -502,6 +502,75 @@ class Project(models.Model):
             deployment.status = 'success'
             deployment.save(update_fields=['status'])
             append_log(f"Deployed successfully on port {self.exposed_port}")
+
+            # Optional: replicate to remote hosts via SSH
+            try:
+                remote_hosts = getattr(settings, 'REMOTE_DEPLOY_HOSTS', []) or []
+                ssh_user = getattr(settings, 'REMOTE_DEPLOY_SSH_USER', '') or ''
+                ssh_key = getattr(settings, 'REMOTE_DEPLOY_SSH_KEY_PATH', '') or ''
+                if remote_hosts and ssh_user and ssh_key:
+                    append_log(f"Replicating image to remote hosts via SSH: {', '.join(remote_hosts)}")
+                    import tempfile as _tempfile
+                    import uuid as _uuid
+                    import os as _os
+                    import subprocess as _subprocess
+                    # Save image to tar
+                    tar_path = _os.path.join(_tempfile.gettempdir(), f"{image_name}_{_uuid.uuid4().hex[:8]}.tar")
+                    save_result = _subprocess.run(['docker', 'save', '-o', tar_path, image_name], capture_output=True, text=True)
+                    if save_result.returncode != 0:
+                        append_log("docker save failed: " + save_result.stderr.strip())
+                    else:
+                        try:
+                            import paramiko as _paramiko
+                            for host in remote_hosts:
+                                try:
+                                    append_log(f"Connecting to {host}...")
+                                    client = _paramiko.SSHClient()
+                                    client.set_missing_host_key_policy(_paramiko.AutoAddPolicy())
+                                    client.connect(hostname=host, username=ssh_user, key_filename=ssh_key, timeout=20)
+                                    sftp = client.open_sftp()
+                                    remote_tar = f"/tmp/{image_name}.tar"
+                                    sftp.put(tar_path, remote_tar)
+                                    sftp.close()
+                                    # Build docker run command on remote
+                                    canonical_name = f"{repo_name}_{self.id}"
+                                    # Stop and remove existing
+                                    cmds = [
+                                        f"docker load -i {remote_tar}",
+                                        f"docker rm -f {canonical_name} || true",
+                                    ]
+                                    # Compose env vars
+                                    env_args = ' '.join([f"-e {k}={v}" for k, v in env_vars.items()])
+                                    run_cmd = f"docker run -d -p {self.exposed_port}:{container_port} {env_args} --name {canonical_name} {image_name}"
+                                    if self.run_command:
+                                        run_cmd = run_cmd + ' ' + self.run_command
+                                    cmds.append(run_cmd)
+                                    # Execute in one shell
+                                    full_cmd = ' && '.join(cmds)
+                                    stdin, stdout, stderr = client.exec_command(full_cmd, timeout=60)
+                                    out = stdout.read().decode('utf-8', errors='ignore').strip()
+                                    err = stderr.read().decode('utf-8', errors='ignore').strip()
+                                    if out:
+                                        append_log(f"[{host}] " + out)
+                                    if err:
+                                        append_log(f"[{host}:stderr] " + err)
+                                    # Cleanup tar on remote
+                                    client.exec_command(f"rm -f {remote_tar}")
+                                    client.close()
+                                    append_log(f"Replicated to {host} successfully")
+                                except Exception as re:
+                                    append_log(f"Remote deploy to {host} failed: {str(re)}")
+                        except Exception as ie:
+                            append_log(f"SSH replication failed: {str(ie)}")
+                    try:
+                        _os.remove(tar_path)
+                    except Exception:
+                        pass
+                else:
+                    append_log("Remote SSH deploy not configured; skipping.")
+            except Exception as outer:
+                append_log(f"Remote replication error: {str(outer)}")
+
             return True, "Deployment completed"
         except Exception as e:
             self.status = 'failed'

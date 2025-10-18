@@ -29,6 +29,7 @@ services:
       - staticfiles:/app/staticfiles
       - media:/app/media
       - /var/run/docker.sock:/var/run/docker.sock
+      - /home/ec2-user/main-app2/EasyDeploy/backend-key.pem:/app/ssh/backend-key.pem:ro
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
@@ -43,6 +44,10 @@ services:
       DB_HOST: "database-1.c728eaaievd3.us-east-1.rds.amazonaws.com"
       DB_PORT: "5432"
       DB_SSLMODE: "require"
+      # Remote SSH deploy
+      REMOTE_DEPLOY_HOSTS: "10.0.153.76"
+      REMOTE_DEPLOY_SSH_USER: "ec2-user"
+      REMOTE_DEPLOY_SSH_KEY_PATH: "/app/ssh/backend-key.pem"
     command: >
       bash -lc "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     restart: unless-stopped

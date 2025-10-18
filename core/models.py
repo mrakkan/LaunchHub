@@ -460,7 +460,7 @@ class Project(models.Model):
             # Ensure temp name not in use
             subprocess.run(['docker', 'rm', '-f', new_name], capture_output=True)
 
-            final_cmd = ['docker', 'run', '-d', '-p', f"{self.exposed_port}:{container_port}"]
+            final_cmd = ['docker', 'run', '--restart', 'unless-stopped', '-d', '-p', f"{self.exposed_port}:{container_port}"]
             for key, value in env_vars.items():
                 final_cmd.extend(['-e', f"{key}={value}"])
             final_cmd.extend(['--name', new_name])
@@ -541,7 +541,7 @@ class Project(models.Model):
                                     ]
                                     # Compose env vars
                                     env_args = ' '.join([f"-e {k}={v}" for k, v in env_vars.items()])
-                                    run_cmd = f"docker run -d -p {self.exposed_port}:{container_port} {env_args} --name {canonical_name} {image_name}"
+                                    run_cmd = f"docker run --restart unless-stopped -d -p {self.exposed_port}:{container_port} {env_args} --name {canonical_name} {image_name}"
                                     if self.run_command:
                                         run_cmd = run_cmd + ' ' + self.run_command
                                     cmds.append(run_cmd)

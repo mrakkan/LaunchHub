@@ -13,7 +13,8 @@ Install Docker and Docker Compose
   sudo yum update -y
   sudo amazon-linux-extras enable docker
   sudo yum install -y docker
-  sudo service docker start
+  sudo systemctl enable docker
+  sudo systemctl start docker
   sudo usermod -a -G docker $USER
   # Log out/in to apply docker group
   curl -L "https://github.com/docker/compose/releases/download/v2.27.0/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose
@@ -29,6 +30,8 @@ Install Docker and Docker Compose
   echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
   sudo apt update
   sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  sudo systemctl enable docker
+  sudo systemctl start docker
   sudo usermod -a -G docker $USER
   # Log out/in to apply docker group
   docker compose version
@@ -43,9 +46,14 @@ docker compose up -d --build
 ```
 
 What this does
-- Builds and starts the web container
+- Builds and starts the web container (restart policy: `unless-stopped`)
 - Runs Django migrations against your RDS PostgreSQL
 - Serves the app via `runserver` on container port `8000`, mapped to host `8080`
+
+Auto-start on reboot
+- The platform web container uses `restart: unless-stopped` and will auto-start when Docker starts
+- User app containers launched by EasyDeploy also use `--restart unless-stopped` and will auto-start on both Machine A and Machine B
+- Make sure Docker service is enabled on boot: `sudo systemctl enable docker`
 
 Open in Browser
 - Visit `http://<EC2-IP>:8080/`

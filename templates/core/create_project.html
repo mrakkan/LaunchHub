@@ -40,7 +40,7 @@
                     {% if has_github_connected and github_repos %}
                     <div class="mb-3">
                         <label for="repo_select" class="form-label">Select GitHub Repository *</label>
-                        <select class="form-select" id="repo_select" required>
+                        <select class="form-select" id="repo_select" style="background-color: #121315; color: white;" required>
                             <option value="" selected disabled>-- Select a repository --</option>
                             {% for r in github_repos %}
                                 <option value="{{ r.clone_url }}" data-name="{{ r.name }}">{{ r.full_name }}</option>

@@ -136,7 +136,7 @@
                 {% if recent_projects %}
                 <div class="list-group list-group-flush">
                     {% for project in recent_projects %}
-                    <a href="{% url 'core:project_detail' project.id %}" class="list-group-item list-group-item-action" style="background-color: #121315; color: #e6eef0;">
+                    <a href="{% url 'core:project_detail' project.id %}" class="list-group-item list-group-item-action" style="background-color: #16181a; color: #e6eef0;">
                         <div class="d-flex w-100 justify-content-between">
                             <h6 class="mb-1">{{ project.name }}</h6>
                             <small class="text-muted">{{ project.updated_at|date:"M d" }}</small>

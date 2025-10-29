@@ -35,7 +35,7 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 1rem;
     font-weight: 600;
     line-height: 1.2;
-    color: var(--secondary-color);
+    color: white;
 }
 
 a {
@@ -47,7 +47,6 @@ a {
 a:hover {
     color: var(--primary-color-dark);
     text-decoration: underline;
-    color: white;
 }
 
 /* Buttons */

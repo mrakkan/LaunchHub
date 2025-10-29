@@ -45,7 +45,9 @@ services:
       DB_PORT: "5432"
       DB_SSLMODE: "require"
       # Remote SSH deploy
-      REMOTE_DEPLOY_HOSTS: "10.0.153.76"
+-      REMOTE_DEPLOY_HOSTS: "10.0.153.76"
++      REMOTE_DEPLOY_HOSTS: "${REMOTE_DEPLOY_HOSTS}"
++      LOCAL_HOST_IP: "${LOCAL_HOST_IP}"
       REMOTE_DEPLOY_SSH_USER: "ec2-user"
       REMOTE_DEPLOY_SSH_KEY_PATH: "/app/ssh/backend-key.pem"
     command: >

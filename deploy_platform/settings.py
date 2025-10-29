@@ -167,3 +167,5 @@ else:
     REMOTE_DEPLOY_HOSTS = []
 REMOTE_DEPLOY_SSH_USER = os.environ.get('REMOTE_DEPLOY_SSH_USER', '')
 REMOTE_DEPLOY_SSH_KEY_PATH = os.environ.get('REMOTE_DEPLOY_SSH_KEY_PATH', '')
+# NEW: Local host IP to allow skipping self in SSH replication
+LOCAL_HOST_IP = os.environ.get('LOCAL_HOST_IP', '')

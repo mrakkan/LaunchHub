@@ -508,6 +508,10 @@ class Project(models.Model):
                 remote_hosts = getattr(settings, 'REMOTE_DEPLOY_HOSTS', []) or []
                 ssh_user = getattr(settings, 'REMOTE_DEPLOY_SSH_USER', '') or ''
                 ssh_key = getattr(settings, 'REMOTE_DEPLOY_SSH_KEY_PATH', '') or ''
+                # Skip self if included (supports symmetric cluster configs)
+                local_ip = getattr(settings, 'LOCAL_HOST_IP', '') or ''
+                if local_ip:
+                    remote_hosts = [h for h in remote_hosts if h != local_ip]
                 if remote_hosts and ssh_user and ssh_key:
                     append_log(f"Replicating image to remote hosts via SSH: {', '.join(remote_hosts)}")
                     import tempfile as _tempfile

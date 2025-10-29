@@ -30,7 +30,6 @@
                             <tr>
                                 <th>Name</th>
                                 <th>Status</th>
-                                <th>Port</th>
                                 <th>Visibility</th>
                                 <th>Created</th>
                                 <th>Actions</th>
@@ -52,13 +51,6 @@
                                         <span class="badge bg-danger">Failed</span>
                                     {% else %}
                                         <span class="badge bg-secondary">{{ project.status|title }}</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if project.exposed_port %}
-                                        <span class="badge bg-info">{{ project.exposed_port }}</span>
-                                    {% else %}
-                                        <span class="text-muted">-</span>
                                     {% endif %}
                                 </td>
                                 <td>

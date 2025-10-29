@@ -64,3 +64,14 @@ Notes
 - Ensure your RDS Security Group allows inbound `TCP 5432` from the EC2 instance's Security Group.
 - `DB_SSLMODE` can be set via environment (default in settings is `prefer`). For production, use `require`.
 - Static files are stored in `/app/staticfiles` and served by the app. Consider an Nginx reverse proxy when adding a domain and HTTPS.
+
+Remote SSH replication to a second EC2
+- This platform can replicate the built Docker image and run the app on another EC2 via SSH.
+- The compose file sets `REMOTE_DEPLOY_HOSTS` to both private IPs. When you click Deploy on EC2 A or B, it will deploy locally and replicate to the other.
+- To avoid SSHing to itself, the app auto-detects the local EC2 private IP via instance metadata. You can also set `LOCAL_HOST_IP` explicitly if desired.
+- Ensure the SSH key is mounted at `/app/ssh/backend-key.pem` and that `REMOTE_DEPLOY_SSH_USER` has permission on the peer EC2.
+- Example (if you prefer explicit env):
+  ```bash
+  export LOCAL_HOST_IP=10.0.140.245   # on EC2-1; use 10.0.153.76 on EC2-2
+  docker compose up -d --build
+  ```

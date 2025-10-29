@@ -510,6 +510,30 @@ class Project(models.Model):
                 ssh_key = getattr(settings, 'REMOTE_DEPLOY_SSH_KEY_PATH', '') or ''
                 # Skip self if included (supports symmetric cluster configs)
                 local_ip = getattr(settings, 'LOCAL_HOST_IP', '') or ''
+                if not local_ip:
+                    try:
+                        # Try AWS IMDSv2 first
+                        import requests as _requests
+                        token = ''
+                        try:
+                            token = _requests.put(
+                                'http://169.254.169.254/latest/api/token',
+                                headers={'X-aws-ec2-metadata-token-ttl-seconds': '21600'},
+                                timeout=1
+                            ).text.strip()
+                        except Exception:
+                            token = ''
+                        headers = {'X-aws-ec2-metadata-token': token} if token else {}
+                        try:
+                            local_ip = _requests.get(
+                                'http://169.254.169.254/latest/meta-data/local-ipv4',
+                                headers=headers,
+                                timeout=1
+                            ).text.strip()
+                        except Exception:
+                            local_ip = ''
+                    except Exception:
+                        local_ip = ''
                 if local_ip:
                     remote_hosts = [h for h in remote_hosts if h != local_ip]
                 if remote_hosts and ssh_user and ssh_key:

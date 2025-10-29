@@ -1,23 +1,27 @@
 /* Main CSS file for Deploy Platform */
 
 :root {
-    --primary-color: #3498db;
-    --secondary-color: #2c3e50;
+    /* Theme colors (dark theme) */
+    --primary-color: #32F08C; /* replaced from #3498db */
+    --primary-color-dark: #28C070; /* darker variant for hover/borders */
+    --secondary-color: #c8d6df; /* lighter text accent */
     --accent-color: #1abc9c;
-    --light-bg: #f8f9fa;
-    --dark-bg: #343a40;
+    --bg: #0f1113; /* overall background */
+    --surface: #16181a; /* card / surface background */
+    --muted-surface: #121315; /* slightly different surface */
+    --text-color: #e6eef0;
     --success-color: #28a745;
     --warning-color: #ffc107;
     --danger-color: #dc3545;
     --border-radius: 8px;
-    --box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    --box-shadow: 0 6px 18px rgba(0,0,0,0.6);
     --transition-speed: 0.3s;
 }
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--light-bg);
-    color: #333;
+    background-color: var(--bg);
+    color: var(--text-color);
     line-height: 1.6;
 }
 
@@ -41,7 +45,7 @@ a {
 }
 
 a:hover {
-    color: #217dbb;
+    color: var(--primary-color-dark);
     text-decoration: underline;
 }
 
@@ -65,12 +69,12 @@ a:hover {
 .btn-primary {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
-    color: white;
+    color: #08100b;
 }
 
 .btn-primary:hover {
-    background-color: #217dbb;
-    border-color: #217dbb;
+    background-color: var(--primary-color-dark);
+    border-color: var(--primary-color-dark);
 }
 
 .btn-success {
@@ -106,10 +110,10 @@ a:hover {
     padding: 0.5rem 0.75rem;
     font-size: 1rem;
     line-height: 1.5;
-    color: #495057;
-    background-color: #fff;
+    color: var(--text-color);
+    background-color: var(--muted-surface);
     background-clip: padding-box;
-    border: 1px solid #ced4da;
+    border: 1px solid rgba(255,255,255,0.06);
     border-radius: var(--border-radius);
     transition: border-color var(--transition-speed);
 }
@@ -117,7 +121,7 @@ a:hover {
 .form-control:focus {
     border-color: var(--primary-color);
     outline: 0;
-    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    box-shadow: 0 0 0 0.2rem rgba(50, 240, 140, 0.18);
 }
 
 /* Cards */
@@ -127,9 +131,9 @@ a:hover {
     flex-direction: column;
     min-width: 0;
     word-wrap: break-word;
-    background-color: #fff;
+    background-color: var(--surface);
     background-clip: border-box;
-    border: 1px solid rgba(0, 0, 0, 0.125);
+    border: 1px solid rgba(255,255,255,0.04);
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
     transition: transform var(--transition-speed);
@@ -142,8 +146,8 @@ a:hover {
 .card-header {
     padding: 1rem;
     margin-bottom: 0;
-    background-color: rgba(0, 0, 0, 0.03);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    background-color: rgba(255,255,255,0.02);
+    border-bottom: 1px solid rgba(255,255,255,0.03);
 }
 
 .card-body {
@@ -153,8 +157,8 @@ a:hover {
 
 .card-footer {
     padding: 1rem;
-    background-color: rgba(0, 0, 0, 0.03);
-    border-top: 1px solid rgba(0, 0, 0, 0.125);
+    background-color: rgba(255,255,255,0.02);
+    border-top: 1px solid rgba(255,255,255,0.03);
 }
 
 /* Project Cards */
@@ -195,7 +199,7 @@ a:hover {
     padding: 1.5rem;
     border-radius: var(--border-radius);
     margin-bottom: 1rem;
-    color: white;
+    color: #08100b;
 }
 
 .stat-primary {

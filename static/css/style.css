@@ -224,3 +224,79 @@ a:hover {
         transform: none;
     }
 }
+
+/* Bootstrap variable overrides for dark theme */
+:root {
+  --bs-body-bg: var(--bg);
+  --bs-body-color: var(--text-color);
+  --bs-primary: #32F08C;
+  --bs-primary-rgb: 50, 240, 140;
+  --bs-secondary: #c8d6df;
+  --bs-secondary-rgb: 200, 214, 223;
+  --bs-success: #28a745;
+  --bs-success-rgb: 40, 167, 69;
+  --bs-info: #1abc9c;
+  --bs-info-rgb: 26, 188, 156;
+  --bs-warning: #ffc107;
+  --bs-warning-rgb: 255, 193, 7;
+  --bs-danger: #dc3545;
+  --bs-danger-rgb: 220, 53, 69;
+  --bs-light: #e6eef0;
+  --bs-light-rgb: 230, 238, 240;
+  --bs-dark: #0f1113;
+  --bs-dark-rgb: 15, 17, 19;
+}
+
+/* Navbar and dropdowns */
+.navbar {
+  background-color: var(--surface) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.navbar .navbar-brand,
+.navbar .nav-link {
+  color: var(--secondary-color) !important;
+}
+.navbar .navbar-brand:hover,
+.navbar .nav-link:hover {
+  color: var(--text-color) !important;
+}
+.dropdown-menu {
+  background-color: var(--surface);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.dropdown-menu .dropdown-item {
+  color: var(--text-color);
+}
+.dropdown-menu .dropdown-item:hover {
+  background-color: rgba(255,255,255,0.06);
+  color: var(--text-color);
+}
+
+/* Buttons and badges */
+.btn-outline-primary {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+.btn-outline-primary:hover {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color-dark);
+  color: #08100b;
+}
+.badge.bg-info {
+  background-color: var(--accent-color) !important;
+}
+
+/* Tables */
+.table {
+  color: var(--text-color);
+  background-color: var(--surface);
+}
+.table thead {
+  background-color: rgba(255,255,255,0.04);
+}
+.table tbody tr {
+  border-color: rgba(255,255,255,0.06);
+}
+
+/* Muted text */
+.text-muted { color: rgba(230, 238, 240, 0.6) !important; }

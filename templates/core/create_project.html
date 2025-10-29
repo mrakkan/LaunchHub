@@ -1,6 +1,6 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Create Project - EasyDeploy{% endblock %}
+{% block title %}Create Project - LaunchHub{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
@@ -135,7 +135,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <p class="mb-3">คุณยังไม่ได้เชื่อมบัญชี GitHub กับ EasyDeploy โปรดเชื่อมต่อเพื่อดึงข้อมูล repository และจัดการการ deploy ได้สะดวก</p>
+        <p class="mb-3">คุณยังไม่ได้เชื่อมบัญชี GitHub กับ LaunchHub โปรดเชื่อมต่อเพื่อดึงข้อมูล repository และจัดการการ deploy ได้สะดวก</p>
         <div class="d-flex flex-column gap-2">
           <a href="{% url 'core:github_login' %}" class="btn btn-dark"><i class="bi bi-github me-1"></i>เชื่อม GitHub</a>
           <a href="{% url 'core:edit_profile' %}" class="btn btn-outline-secondary"><i class="bi bi-gear me-1"></i>ไปที่ Settings</a>

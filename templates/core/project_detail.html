@@ -56,14 +56,6 @@
                         {% endif %}
                     </dd>
                     
-                    <dt class="col-sm-4">Port:</dt>
-                    <dd class="col-sm-8">
-                        {% if project.exposed_port %}
-                            <span class="badge bg-info">{{ project.exposed_port }}</span>
-                        {% else %}
-                            <span class="text-muted">Not assigned</span>
-                        {% endif %}
-                    </dd>
                     
                     <dt class="col-sm-4">Visibility:</dt>
                     <dd class="col-sm-8">
@@ -79,13 +71,6 @@
                     
                     <dt class="col-sm-4">Updated:</dt>
                     <dd class="col-sm-8">{{ project.updated_at|date:"M d, Y H:i" }}</dd>
-                    
-                    {% if project.docker_container_id %}
-                    <dt class="col-sm-4">Container:</dt>
-                    <dd class="col-sm-8">
-                        <small class="text-muted">{{ project.docker_container_id|truncatechars:12 }}</small>
-                    </dd>
-                    {% endif %}
                 </dl>
                 
                 <hr>

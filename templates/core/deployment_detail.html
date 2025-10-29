@@ -145,7 +145,7 @@
             <div class="card-body">
                 {% if recent_deployments %}
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table">
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -158,7 +158,7 @@
                         </thead>
                         <tbody>
                             {% for dep in recent_deployments %}
-                            <tr {% if dep.id == deployment.id %}class="table-primary"{% endif %}>
+                            <tr {% if dep.id == deployment.id %}class="table"{% endif %}>
                                 <td><strong>#{{ dep.id }}</strong></td>
                                 <td>
                                     {% if dep.status == 'success' %}

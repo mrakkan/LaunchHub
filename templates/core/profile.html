@@ -81,12 +81,12 @@
         <div class="card-body">
           <h2 class="h5 mb-3">Contact Information</h2>
           <ul class="list-group list-group-flush">
-            <li class="list-group-item d-flex align-items-center justify-content-between">
+            <li class="list-group-item d-flex align-items-center justify-content-between" style="background-color: #121315;">
               <div><i class="bi bi-envelope me-2 text-primary"></i><span class="text-muted">Email</span></div>
-              <div class="fw-medium">{{ u.email }}</div>
+              <div class="fw-medium" style="background-color: #e6eef0;">{{ u.email }}</div>
             </li>
             {% if p.website %}
-            <li class="list-group-item d-flex align-items-center justify-content-between">
+            <li class="list-group-item d-flex align-items-center justify-content-between" style="background-color: #121315;">
               <div><i class="bi bi-globe me-2 text-success"></i><span class="text-muted">Website</span></div>
               <a href="{{ p.website }}" target="_blank" class="fw-medium text-decoration-none">{{ p.website|truncatechars:40 }}</a>
             </li>

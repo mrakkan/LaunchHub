@@ -47,6 +47,7 @@ a {
 a:hover {
     color: var(--primary-color-dark);
     text-decoration: underline;
+    color: white;
 }
 
 /* Buttons */

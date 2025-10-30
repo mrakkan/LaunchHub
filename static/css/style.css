@@ -25,6 +25,23 @@ body {
     line-height: 1.6;
 }
 
+/* Remove underline from all buttons and links that look like buttons */
+.btn,
+.btn:hover,
+.btn:focus,
+.btn:active,
+a.btn,
+a.btn:hover,
+a.btn:focus,
+a.btn:active,
+.nav-link,
+.nav-link:hover,
+.nav-link:focus,
+.dropdown-item,
+.dropdown-item:hover {
+    text-decoration: none !important;
+}
+
 .container {
     max-width: 1200px;
     padding: 0 15px;

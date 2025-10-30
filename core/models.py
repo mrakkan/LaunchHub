@@ -729,16 +729,20 @@ class Project(models.Model):
             return False
     
     def get_preview_url(self):
-        """Return preview URL if container is running"""
+        """Return preview URL if container is running.
+        For ALB setup with multiple listeners/target groups:
+        - Each port (5000-5019) should be accessible directly via ALB
+        - URL format: http://alb-dns:port/
+        """
         # First verify container is actually running
         is_running = self.check_container_status()
         if is_running and self.exposed_port:
             base = getattr(settings, 'PUBLIC_BASE_URL', '') or os.environ.get('PUBLIC_BASE_URL', '')
             if base:
                 base = base.rstrip('/')
-                include_port_env = (os.environ.get('PUBLIC_BASE_INCLUDE_PORT', 'true') or '').strip().lower()
-                include_port = include_port_env in ('1', 'true', 'yes', '')
-                if include_port and self.exposed_port:
+                # Always include port number for deployed projects
+                # ALB listeners should route each port to the correct target group
+                if self.exposed_port:
                     return f"{base}:{self.exposed_port}/"
                 return f"{base}/"
             return f"http://localhost:{self.exposed_port}/"

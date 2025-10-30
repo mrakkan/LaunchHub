@@ -37,7 +37,8 @@ services:
       GITHUB_CLIENT_SECRET: "100d4a956460db2e54ac8bc0980dcdfe40eafb18"
       GITHUB_REDIRECT_URI: "http://launchhub-alb-1333351530.us-east-1.elb.amazonaws.com/github/callback/"
       PUBLIC_BASE_URL: "http://launchhub-alb-1333351530.us-east-1.elb.amazonaws.com"
-      PUBLIC_BASE_INCLUDE_PORT: "false"
+      # Deployed projects: always include port in URL (e.g., :5000, :5001)
+      # ALB should have listeners for each port routing to respective target groups
       # RDS database connection (override local db)
       DB_NAME: "easydeploy"
       DB_USER: "postgres"

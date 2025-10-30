@@ -635,7 +635,24 @@ class Project(models.Model):
 
     def check_container_status(self):
         """Check if container is actually running in Docker and update status"""
+        # Derive canonical name (used across hosts)
+        repo_name = self.github_repo_url.split('/')[-1].replace('.git', '')
+        canonical_name = f"{repo_name}_{self.id}"
         if not self.docker_container_id:
+            # Fallback: try to locate container by canonical name on this host
+            try:
+                find_cmd = ['docker', 'ps', '-q', '-f', f'name={canonical_name}']
+                find_result = subprocess.run(find_cmd, capture_output=True, text=True)
+                cid = (find_result.stdout or '').strip().splitlines()
+                if cid:
+                    self.docker_container_id = cid[0]
+                    if self.status != 'running':
+                        self.status = 'running'
+                        self.save()
+                    return True
+            except Exception:
+                pass
+            # Not found by name; mark stopped
             if self.status == 'running':
                 self.status = 'stopped'
                 self.save()
@@ -648,6 +665,20 @@ class Project(models.Model):
             
             # If command failed or container not running
             if result.returncode != 0 or result.stdout.strip().lower() != 'true':
+                # If the stored ID is not running on this host, try to locate by name
+                try:
+                    find_cmd = ['docker', 'ps', '-q', '-f', f'name={canonical_name}']
+                    find_result = subprocess.run(find_cmd, capture_output=True, text=True)
+                    cid = (find_result.stdout or '').strip().splitlines()
+                    if cid:
+                        self.docker_container_id = cid[0]
+                        if self.status != 'running':
+                            self.status = 'running'
+                            self.save()
+                        return True
+                except Exception:
+                    pass
+                # Not found: mark stopped
                 if self.status == 'running':
                     self.status = 'stopped'
                     self.docker_container_id = ''
@@ -676,7 +707,11 @@ class Project(models.Model):
             base = getattr(settings, 'PUBLIC_BASE_URL', '') or os.environ.get('PUBLIC_BASE_URL', '')
             if base:
                 base = base.rstrip('/')
-                return f"{base}:{self.exposed_port}/"
+                include_port_env = (os.environ.get('PUBLIC_BASE_INCLUDE_PORT', 'true') or '').strip().lower()
+                include_port = include_port_env in ('1', 'true', 'yes', '')
+                if include_port and self.exposed_port:
+                    return f"{base}:{self.exposed_port}/"
+                return f"{base}/"
             return f"http://localhost:{self.exposed_port}/"
         return ""
 

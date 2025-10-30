@@ -547,10 +547,10 @@ def edit_profile(request):
 def change_password(request):
     """Change account password"""
     if request.method == 'POST':
-        old_password = request.POST.get('old_password')
+        current_password = request.POST.get('current_password')
         new_password = request.POST.get('new_password')
         confirm_password = request.POST.get('confirm_password')
-        if not request.user.check_password(old_password):
+        if not request.user.check_password(current_password):
             messages.error(request, 'Current password is incorrect')
         elif not new_password:
             messages.error(request, 'New password cannot be empty')

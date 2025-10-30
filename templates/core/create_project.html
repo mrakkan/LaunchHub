@@ -69,7 +69,7 @@
                         </div>
                     </div>
 
-                    <!-- Advanced build & run settings -->
+                    
                     <div class="mb-3">
                         <label for="dockerfile_path" class="form-label">Dockerfile Path</label>
                         <input type="text" class="form-control" id="dockerfile_path" name="dockerfile_path" placeholder="Dockerfile" value="{{ form.dockerfile_path.value|default:'' }}">
@@ -126,7 +126,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- GitHub connect modal -->
+
 <div class="modal fade" id="githubConnectModal" tabindex="-1" aria-labelledby="githubConnectLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">

@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </a>
                 </p>
                 
-                <!-- Project Tags -->
+                
                 <div class="mb-2">
                     {% for tag in project.tags.all %}
                         <a href="{% url 'core:explore_projects' %}?tag={{ tag.slug }}" class="badge bg-info text-decoration-none">

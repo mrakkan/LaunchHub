@@ -80,7 +80,7 @@
                     <i class="bi bi-github"></i> {{ project.github_repo_url|truncatechars:40 }}
                 </a></p>
                 
-                <!-- Project Tags -->
+                
                 <h6 class="mt-3">Tags:</h6>
                 <div class="d-flex flex-wrap gap-1 mb-2">
                     {% for tag in project.tags.all %}
@@ -102,11 +102,11 @@
             </div>
         </div>
         
-        <!-- Environment Variables card removed; managed via Project JSON only -->
+        
     </div>
     
     <div class="col-md-8">
-        <!-- Deployment History -->
+        
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0"><i class="bi bi-clock-history"></i> Deployment History</h5>
@@ -171,7 +171,7 @@
     </div>
 </div>
 
-<!-- Environment Variable modal removed -->
+
 {% endblock %}
 
 {% block scripts %}

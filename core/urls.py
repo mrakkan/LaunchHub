@@ -9,7 +9,6 @@ urlpatterns = [
     path('logout/', views.user_logout, name='user_logout'),
     path('signup/', views.signup, name='signup'),
 
-    # Dashboard & Projects
     path('dashboard/', views.dashboard, name='dashboard'),
     path('projects/', views.project_list, name='project_list'),
     path('projects/<int:project_id>/', views.project_detail, name='project_detail'),
@@ -19,31 +18,23 @@ urlpatterns = [
     path('api/deployments/<int:deployment_id>/log/', views.deployment_log_api, name='deployment_log_api'),
     path('projects/<int:project_id>/delete/', views.delete_project, name='delete_project'),
     path('projects/<int:project_id>/stop/', views.stop_project, name='stop_project'),
-    # env var add/delete routes removed; env vars are managed within Project JSON
 
-    # Explore (public)
     path('explore/', views.explore_projects, name='explore_projects'),
-    
-    # Project Tags
+
     path('projects/tags/add/', views.add_project_tag, name='add_project_tag'),
     path('projects/tags/remove/', views.remove_project_tag, name='remove_project_tag'),
 
-    # Profile (self)
     path('profile/', views.profile, name='profile'),
     path('profile/edit/', views.edit_profile, name='edit_profile'),
     path('profile/change-password/', views.change_password, name='change_password'),
 
-    # Public profile
     path('u/<str:username>/', views.public_profile, name='public_profile'),
 
-    # GitHub OAuth
     path('github/login/', views.github_login, name='github_login'),
     path('github/callback/', views.github_callback, name='github_callback'),
     path('github/disconnect/', views.github_disconnect, name='github_disconnect'),
 
-    # Webhook endpoint
     path('webhook/github/<int:project_id>/', views.github_webhook, name='github_webhook'),
 
-    # Health check
     path('health/', views.health_check, name='health_check'),
 ]

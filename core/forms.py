@@ -6,14 +6,13 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q
 import json
 
-
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(required=True)
-    
+
     class Meta:
         model = User
         fields = ('username', 'email', 'password1', 'password2')
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
@@ -27,9 +26,7 @@ class SignUpForm(UserCreationForm):
             raise ValidationError('Email already exists')
         return email
 
-
 class ProjectForm(forms.ModelForm):
-    # Extra non-model input for env vars in KEY=VALUE lines
     env_vars = forms.CharField(required=False, widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 5}))
 
     class Meta:
@@ -58,7 +55,6 @@ class ProjectForm(forms.ModelForm):
             raise ValidationError('GitHub repository URL is required')
         if not (url.startswith('https://github.com/') or url.startswith('http://github.com/')):
             raise ValidationError('GitHub URL must start with https://github.com/')
-        # Basic format check: must have at least owner/repo
         parts = url.replace('https://github.com/', '').replace('http://github.com/', '').split('/')
         if len(parts) < 2 or not parts[0] or not parts[1]:
             raise ValidationError('Invalid GitHub repository URL format')
@@ -68,7 +64,6 @@ class ProjectForm(forms.ModelForm):
         name = (self.cleaned_data.get('name') or '').strip()
         if not name:
             raise ValidationError('Project name is required')
-        # Optional: ensure uniqueness per owner if available in form
         if self.user:
             existing = Project.objects.filter(owner=self.user, name__iexact=name)
             if self.instance.pk:
@@ -82,7 +77,7 @@ class ProjectForm(forms.ModelForm):
         env_dict = {}
         for line in raw.splitlines():
             line = line.strip()
-            if not line or line.startswith('#'):
+            if not line or line.startswith('
                 continue
             if '=' not in line:
                 raise ValidationError('Invalid environment variable format. Use KEY=VALUE per line.')
@@ -92,23 +87,17 @@ class ProjectForm(forms.ModelForm):
             if not key:
                 raise ValidationError('Environment variable key cannot be empty')
             env_dict[key] = value
-        # store JSON as string into model field later in save()
         return json.dumps(env_dict)
 
     def save(self, commit=True):
         instance = super().save(commit=False)
-        # attach owner if provided via form initialization
         if self.user and not instance.owner_id:
             instance.owner = self.user
-        # Always auto-assign a port for new projects (no user choice)
         if not instance.pk or instance.exposed_port is None:
             instance.exposed_port = instance.get_next_available_port()
-        # Set environment_variables JSON from cleaned env_vars
         env_json = self.cleaned_data.get('env_vars', '')
         instance.environment_variables = env_json
         if commit:
             instance.save()
         return instance
 
-
-# EnvironmentVariableForm removed; environment variables managed via Project.environment_variables JSON

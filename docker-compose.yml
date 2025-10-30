@@ -24,7 +24,7 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "8080:8000"  # use host 8080 to avoid Nginx port 80 conflict
+      - "8080:8000"
     volumes:
       - staticfiles:/app/staticfiles
       - media:/app/media
@@ -37,14 +37,12 @@ services:
       GITHUB_CLIENT_SECRET: "100d4a956460db2e54ac8bc0980dcdfe40eafb18"
       GITHUB_REDIRECT_URI: "http://launchhub-alb-1333351530.us-east-1.elb.amazonaws.com/github/callback/"
       PUBLIC_BASE_URL: "http://launchhub-alb-1333351530.us-east-1.elb.amazonaws.com"
-      # RDS database connection (override local db)
       DB_NAME: "easydeploy"
       DB_USER: "postgres"
       DB_PASSWORD: "Minimax999157"
       DB_HOST: "database-1.c728eaaievd3.us-east-1.rds.amazonaws.com"
       DB_PORT: "5432"
       DB_SSLMODE: "require"
-      # Remote SSH deploy (deploy to both EC2s; app auto-skips self)
       REMOTE_DEPLOY_HOSTS: "10.0.140.245,10.0.153.76"
       LOCAL_HOST_IP: "${LOCAL_HOST_IP}"
       REMOTE_DEPLOY_SSH_USER: "ec2-user"

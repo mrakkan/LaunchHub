@@ -1,29 +1,22 @@
-// Main JavaScript file for Deploy Platform
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize tooltips
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
 
-    // Initialize popovers
     const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
     popoverTriggerList.map(function (popoverTriggerEl) {
         return new bootstrap.Popover(popoverTriggerEl);
     });
 
-    // Project status indicators
     updateProjectStatuses();
 
-    // Deployment log auto-refresh
     setupDeploymentLogRefresh();
 
-    // Form validations
     setupFormValidations();
 });
 
-// Update project status indicators
 function updateProjectStatuses() {
     const statusElements = document.querySelectorAll('.project-status');
     
@@ -42,13 +35,11 @@ function updateProjectStatuses() {
     });
 }
 
-// Setup auto-refresh for deployment logs
 function setupDeploymentLogRefresh() {
     const deploymentLog = document.getElementById('deployment-log');
     if (deploymentLog) {
         const deploymentId = deploymentLog.getAttribute('data-deployment-id');
         if (deploymentId) {
-            // Auto-refresh every 5 seconds if deployment is in progress
             const isDeploying = deploymentLog.getAttribute('data-deploying') === 'true';
             if (isDeploying) {
                 setInterval(() => {
@@ -59,7 +50,6 @@ function setupDeploymentLogRefresh() {
     }
 }
 
-// Fetch deployment log updates
 function fetchDeploymentLog(deploymentId) {
     fetch(`/api/deployments/${deploymentId}/log/`)
         .then(response => response.json())
@@ -68,15 +58,13 @@ function fetchDeploymentLog(deploymentId) {
             if (deploymentLog) {
                 deploymentLog.textContent = data.log;
                 
-                // Scroll to bottom of log
                 deploymentLog.scrollTop = deploymentLog.scrollHeight;
                 
-                // Update status if deployment is complete
                 if (data.status !== 'deploying') {
                     deploymentLog.setAttribute('data-deploying', 'false');
                     const statusBadge = document.getElementById('deployment-status');
                     if (statusBadge) {
-                        statusBadge.className = ''; // Remove all classes
+                        statusBadge.className = '';
                         statusBadge.classList.add('badge', data.status === 'running' ? 'bg-success' : 'bg-danger');
                         statusBadge.textContent = data.status === 'running' ? 'Running' : 'Failed';
                     }
@@ -86,7 +74,6 @@ function fetchDeploymentLog(deploymentId) {
         .catch(error => console.error('Error fetching deployment log:', error));
 }
 
-// Setup form validations
 function setupFormValidations() {
     const forms = document.querySelectorAll('.needs-validation');
     
@@ -102,7 +89,6 @@ function setupFormValidations() {
     });
 }
 
-// Copy to clipboard functionality
 function copyToClipboard(text, buttonElement) {
     navigator.clipboard.writeText(text).then(() => {
         const originalText = buttonElement.innerHTML;
@@ -116,7 +102,6 @@ function copyToClipboard(text, buttonElement) {
     });
 }
 
-// Toggle project visibility (public/private)
 function toggleProjectVisibility(projectId, button) {
     const isPublic = button.getAttribute('data-public') === 'true';
     const newStatus = !isPublic;
@@ -137,7 +122,6 @@ function toggleProjectVisibility(projectId, button) {
                 '<i class="fas fa-eye"></i> Make Private' : 
                 '<i class="fas fa-eye-slash"></i> Make Public';
             
-            // Show success message
             const messageContainer = document.getElementById('messages');
             if (messageContainer) {
                 const alert = document.createElement('div');
@@ -148,7 +132,6 @@ function toggleProjectVisibility(projectId, button) {
                 `;
                 messageContainer.appendChild(alert);
                 
-                // Auto-dismiss after 3 seconds
                 setTimeout(() => {
                     alert.classList.remove('show');
                     setTimeout(() => alert.remove(), 150);
@@ -159,7 +142,6 @@ function toggleProjectVisibility(projectId, button) {
     .catch(error => console.error('Error toggling project visibility:', error));
 }
 
-// Get CSRF token from cookies
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {

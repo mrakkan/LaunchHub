@@ -13,7 +13,7 @@
                 <form method="post" novalidate>
                     {% csrf_token %}
                     
-                    <!-- Non-field errors -->
+                    
                     {% if form.non_field_errors %}
                     <div class="alert alert-danger" role="alert">
                         <i class="bi bi-exclamation-triangle-fill me-2"></i>
@@ -23,7 +23,7 @@
                     </div>
                     {% endif %}
                     
-                    <!-- Username field -->
+                    
                     <div class="mb-3">
                         <label for="username" class="form-label">Username</label>
                         <input type="text" 
@@ -41,7 +41,7 @@
                         {% endif %}
                     </div>
                     
-                    <!-- Email field -->
+                    
                     <div class="mb-3">
                         <label for="email" class="form-label">Email</label>
                         <input type="email" 
@@ -59,7 +59,7 @@
                         {% endif %}
                     </div>
                     
-                    <!-- Password field -->
+                    
                     <div class="mb-3">
                         <label for="password1" class="form-label">Password</label>
                         <input type="password" 
@@ -79,7 +79,7 @@
                         </div>
                     </div>
                     
-                    <!-- Confirm Password field -->
+                    
                     <div class="mb-3">
                         <label for="password2" class="form-label">Confirm Password</label>
                         <input type="password" 

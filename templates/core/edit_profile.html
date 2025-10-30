@@ -13,7 +13,7 @@
             <a href="{% url 'core:profile' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-x-lg me-1"></i>Close</a>
           </div>
 
-          <!-- GitHub connection status & action -->
+          
           <div class="alert {% if has_github_connected %}alert-success{% else %}alert-warning{% endif %} d-flex align-items-center justify-content-between" role="alert">
             <div>
               {% if has_github_connected %}
@@ -35,7 +35,7 @@
           <form method="post" class="needs-validation" novalidate>
             {% csrf_token %}
 
-            <!-- Basic Information -->
+            
             <div class="mb-4">
               <h2 class="h6 text-uppercase text-muted mb-3">Basic Information</h2>
               <div class="row g-3">
@@ -59,7 +59,7 @@
               </div>
             </div>
 
-            <!-- Professional Information -->
+            
             <div class="mb-4">
               <h2 class="h6 text-uppercase text-muted mb-3">Professional Information</h2>
               <div class="row g-3">
@@ -78,7 +78,7 @@
               </div>
             </div>
 
-            <!-- Social Links -->
+            
             <div class="mb-4">
               <h2 class="h6 text-uppercase text-muted mb-3">Social Links</h2>
               <div class="row g-3">
@@ -92,7 +92,7 @@
               </div>
             </div>
 
-            <!-- Actions -->
+            
             <div class="d-flex justify-content-end gap-2">
               <a href="{% url 'core:profile' %}" class="btn btn-outline-secondary">Cancel</a>
               <button type="submit" class="btn btn-primary">Save Changes</button>

@@ -1,14 +1,14 @@
-/* Main CSS file for Deploy Platform */
+
 
 :root {
-    /* Theme colors (dark theme) */
-    --primary-color: #32F08C; /* replaced from #3498db */
-    --primary-color-dark: #28C070; /* darker variant for hover/borders */
-    --secondary-color: #c8d6df; /* lighter text accent */
+    
+    --primary-color: #32F08C; 
+    --primary-color-dark: #28C070; 
+    --secondary-color: #c8d6df; 
     --accent-color: #1abc9c;
-    --bg: #0f1113; /* overall background */
-    --surface: #16181a; /* card / surface background */
-    --muted-surface: #121315; /* slightly different surface */
+    --bg: #0f1113; 
+    --surface: #16181a; 
+    --muted-surface: #121315; 
     --text-color: #e6eef0;
     --success-color: #28a745;
     --warning-color: #ffc107;
@@ -25,7 +25,7 @@ body {
     line-height: 1.6;
 }
 
-/* Remove underline from all buttons and links that look like buttons */
+
 .btn,
 .btn:hover,
 .btn:focus,
@@ -42,7 +42,7 @@ a.btn:active,
     text-decoration: none !important;
 }
 
-/* Custom Alert Styling - Dark Theme */
+
 .alert {
     border: none !important;
     border-radius: 12px !important;
@@ -55,7 +55,7 @@ a.btn:active,
     animation: slideInDown 0.4s ease-out;
 }
 
-/* Alert Container - Fixed Position */
+
 .alert-container {
     position: fixed;
     top: 90px;
@@ -72,7 +72,7 @@ a.btn:active,
     margin-bottom: 10px;
 }
 
-/* Slide in animation */
+
 @keyframes slideInDown {
     from {
         opacity: 0;
@@ -84,7 +84,7 @@ a.btn:active,
     }
 }
 
-/* Fade out animation */
+
 @keyframes fadeOut {
     from {
         opacity: 1;
@@ -100,7 +100,7 @@ a.btn:active,
     animation: fadeOut 0.3s ease-out forwards;
 }
 
-/* Success Alert */
+
 .alert-success {
     background: linear-gradient(135deg, rgba(40, 167, 69, 0.15) 0%, rgba(40, 167, 69, 0.05) 100%) !important;
     border-left: 4px solid #28a745 !important;
@@ -111,7 +111,7 @@ a.btn:active,
     filter: brightness(0) invert(1);
 }
 
-/* Error/Danger Alert */
+
 .alert-danger {
     background: linear-gradient(135deg, rgba(220, 53, 69, 0.15) 0%, rgba(220, 53, 69, 0.05) 100%) !important;
     border-left: 4px solid #dc3545 !important;
@@ -122,7 +122,7 @@ a.btn:active,
     filter: brightness(0) invert(1);
 }
 
-/* Warning Alert */
+
 .alert-warning {
     background: linear-gradient(135deg, rgba(255, 193, 7, 0.15) 0%, rgba(255, 193, 7, 0.05) 100%) !important;
     border-left: 4px solid #ffc107 !important;
@@ -133,7 +133,7 @@ a.btn:active,
     filter: brightness(0) invert(1);
 }
 
-/* Info Alert */
+
 .alert-info {
     background: linear-gradient(135deg, rgba(13, 110, 253, 0.15) 0%, rgba(13, 110, 253, 0.05) 100%) !important;
     border-left: 4px solid #0d6efd !important;
@@ -144,7 +144,7 @@ a.btn:active,
     filter: brightness(0) invert(1);
 }
 
-/* Alert Icons */
+
 .alert i,
 .alert .bi {
     font-size: 1.1rem;
@@ -152,7 +152,7 @@ a.btn:active,
     vertical-align: middle;
 }
 
-/* Close button styling */
+
 .alert .btn-close {
     opacity: 0.7;
     transition: opacity 0.2s ease;
@@ -167,7 +167,7 @@ a.btn:active,
     padding: 0 15px;
 }
 
-/* Typography */
+
 h1, h2, h3, h4, h5, h6 {
     margin-bottom: 1rem;
     font-weight: 600;
@@ -186,7 +186,7 @@ a:hover {
     text-decoration: underline;
 }
 
-/* Buttons */
+
 .btn {
     display: inline-block;
     font-weight: 500;
@@ -236,7 +236,7 @@ a:hover {
     border-color: #c82333;
 }
 
-/* Forms */
+
 .form-group {
     margin-bottom: 1rem;
 }
@@ -261,7 +261,7 @@ a:hover {
     box-shadow: 0 0 0 0.2rem rgba(50, 240, 140, 0.18);
 }
 
-/* Cards */
+
 .card {
     position: relative;
     display: flex;
@@ -298,7 +298,7 @@ a:hover {
     border-top: 1px solid rgba(255,255,255,0.03);
 }
 
-/* Project Cards */
+
 .project-card {
     height: 100%;
 }
@@ -330,7 +330,7 @@ a:hover {
     border: 1px solid var(--danger-color);
 }
 
-/* Dashboard Stats */
+
 .dashboard-stat {
     text-align: center;
     padding: 1.5rem;
@@ -351,7 +351,7 @@ a:hover {
     background-color: var(--accent-color);
 }
 
-/* Responsive */
+
 @media (max-width: 768px) {
     .container {
         padding: 0 10px;
@@ -362,7 +362,7 @@ a:hover {
     }
 }
 
-/* Bootstrap variable overrides for dark theme */
+
 :root {
   --bs-body-bg: var(--bg);
   --bs-body-color: var(--text-color);
@@ -384,7 +384,7 @@ a:hover {
   --bs-dark-rgb: 15, 17, 19;
 }
 
-/* Navbar and dropdowns */
+
 .navbar {
   background-color: var(--surface) !important;
   border-bottom: 1px solid rgba(255,255,255,0.07);
@@ -409,7 +409,7 @@ a:hover {
   color: var(--text-color);
 }
 
-/* Buttons and badges */
+
 .btn-outline-primary {
   color: var(--primary-color);
   border-color: var(--primary-color);
@@ -423,7 +423,7 @@ a:hover {
   background-color: var(--accent-color) !important;
 }
 
-/* Tables */
+
 .table {
   color: var(--text-color);
   background-color: var(--surface);
@@ -435,5 +435,5 @@ a:hover {
   border-color: rgba(255,255,255,0.06);
 }
 
-/* Muted text */
+
 .text-muted { color: rgba(230, 238, 240, 0.6) !important; }

@@ -62,7 +62,7 @@
                                 </td>
                                 <td>{{ project.created_at|date:"M d, Y" }}</td>
                                 <td>
-                                    <div class="btn-group" role="group">
+                                    <div class="btn-group border rounded" role="group"></div>
                                         <a href="{% url 'core:project_detail' project.id %}" class="btn btn-sm btn-outline-primary" title="View Details">
                                             <i class="bi bi-eye"></i>
                                         </a>
@@ -75,7 +75,7 @@
                                                 <i class="bi bi-play-circle"></i>
                                             </button>
                                         {% endif %}
-                                        <button class="btn btn-sm btn-outline-danger delete-project" data-project-id="{{ project.id }}" title="Delete">
+                                        <button class="btn btn-sm btn-outline-danger delete-project" data-project-id="{{ project.id }}" title="Delete"></button>
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </div>

@@ -62,7 +62,7 @@
                                 </td>
                                 <td>{{ project.created_at|date:"M d, Y" }}</td>
                                 <td>
-                                    <div class="btn-group border rounded" role="group"></div>
+                                    <div class="btn-group" role="group">
                                         <a href="{% url 'core:project_detail' project.id %}" class="btn btn-sm btn-outline-primary" title="View Details">
                                             <i class="bi bi-eye"></i>
                                         </a>

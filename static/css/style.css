@@ -52,6 +52,52 @@ a.btn:active,
     font-weight: 500 !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
     backdrop-filter: blur(10px);
+    animation: slideInDown 0.4s ease-out;
+}
+
+/* Alert Container - Fixed Position */
+.alert-container {
+    position: fixed;
+    top: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    width: 90%;
+    max-width: 600px;
+    pointer-events: none;
+}
+
+.alert-container .alert {
+    pointer-events: auto;
+    margin-bottom: 10px;
+}
+
+/* Slide in animation */
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Fade out animation */
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+.alert.fade-out {
+    animation: fadeOut 0.3s ease-out forwards;
 }
 
 /* Success Alert */

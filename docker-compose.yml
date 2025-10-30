@@ -29,7 +29,7 @@ services:
       - staticfiles:/app/staticfiles
       - media:/app/media
       - /var/run/docker.sock:/var/run/docker.sock
-      - /home/ec2-user/main-app2/EasyDeploy/backend-key.pem:/app/ssh/backend-key.pem:ro
+      - /home/ec2-user/main-app2/EasyDeploy:/app/ssh:ro
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:

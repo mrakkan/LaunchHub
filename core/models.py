@@ -536,6 +536,35 @@ class Project(models.Model):
                         local_ip = ''
                 if local_ip:
                     remote_hosts = [h for h in remote_hosts if h != local_ip]
+                # Resolve SSH key path: allow directory path, pick a .pem inside
+                try:
+                    import os as _os
+                    resolved_ssh_key = ssh_key
+                    if resolved_ssh_key and _os.path.isdir(resolved_ssh_key):
+                        # Prefer common filenames
+                        for _cand_name in ['backend-key.pem', 'id_rsa', 'id_ed25519']:
+                            _cand = _os.path.join(resolved_ssh_key, _cand_name)
+                            if _os.path.isfile(_cand):
+                                resolved_ssh_key = _cand
+                                break
+                        # If still directory, pick first *.pem
+                        if _os.path.isdir(resolved_ssh_key):
+                            try:
+                                _entries = _os.listdir(resolved_ssh_key)
+                                _pem_entries = [e for e in _entries if e.lower().endswith('.pem')]
+                                if _pem_entries:
+                                    resolved_ssh_key = _os.path.join(resolved_ssh_key, _pem_entries[0])
+                            except Exception:
+                                pass
+                    # If key path isn't a file after resolution, log and skip
+                    if resolved_ssh_key and not _os.path.isfile(resolved_ssh_key):
+                        append_log(f"SSH key path is not a file: {resolved_ssh_key}. Skipping remote replication.")
+                        remote_hosts = []
+                    else:
+                        ssh_key = resolved_ssh_key
+                except Exception:
+                    pass
+
                 if remote_hosts and ssh_user and ssh_key:
                     append_log(f"Replicating image to remote hosts via SSH: {', '.join(remote_hosts)}")
                     import tempfile as _tempfile

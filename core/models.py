@@ -639,6 +639,9 @@ class Project(models.Model):
     
     def stop_container(self):
         """Stop Docker container on local and all remote hosts"""
+        import logging
+        logger = logging.getLogger(__name__)
+        
         try:
             # Derive canonical and temporary container names for this project
             repo_name = self.github_repo_url.split('/')[-1].replace('.git', '')
@@ -646,20 +649,29 @@ class Project(models.Model):
             staging_name = f"{repo_name}_{self.id}_staging"
             new_name = f"{canonical_name}_new"
 
+            logger.info(f"Stopping containers: {canonical_name}, {new_name}, {staging_name}")
+
             # Stop on LOCAL host
             # Remove by container ID if present (force remove to ensure cleanup)
             if self.docker_container_id:
-                subprocess.run(['docker', 'rm', '-f', self.docker_container_id], capture_output=True)
+                result = subprocess.run(['docker', 'rm', '-f', self.docker_container_id], capture_output=True, text=True)
+                logger.info(f"Local: Removed by ID {self.docker_container_id}: {result.stdout} {result.stderr}")
 
             # Also attempt to remove by known names to avoid name conflicts on next deploy
             for name in [canonical_name, new_name, staging_name]:
-                subprocess.run(['docker', 'rm', '-f', name], capture_output=True)
+                result = subprocess.run(['docker', 'rm', '-f', name], capture_output=True, text=True)
+                logger.info(f"Local: Removed {name}: {result.stdout} {result.stderr}")
 
             # Stop on REMOTE hosts via SSH
             try:
                 remote_hosts = getattr(settings, 'REMOTE_DEPLOY_HOSTS', []) or []
+                if isinstance(remote_hosts, str):
+                    remote_hosts = [h.strip() for h in remote_hosts.split(',') if h.strip()]
+                
                 ssh_user = getattr(settings, 'REMOTE_DEPLOY_SSH_USER', '') or ''
                 ssh_key = getattr(settings, 'REMOTE_DEPLOY_SSH_KEY_PATH', '') or ''
+                
+                logger.info(f"Remote hosts config: {remote_hosts}, user: {ssh_user}, key: {ssh_key}")
                 
                 # Skip self if included
                 local_ip = getattr(settings, 'LOCAL_HOST_IP', '') or ''
@@ -686,8 +698,13 @@ class Project(models.Model):
                             local_ip = ''
                     except Exception:
                         local_ip = ''
+                
+                logger.info(f"Local IP: {local_ip}")
+                
                 if local_ip:
                     remote_hosts = [h for h in remote_hosts if h != local_ip]
+                
+                logger.info(f"Remote hosts after filtering: {remote_hosts}")
                 
                 # Resolve SSH key path
                 import os as _os
@@ -703,16 +720,21 @@ class Project(models.Model):
                         if pem_files:
                             resolved_ssh_key = _os.path.join(resolved_ssh_key, pem_files[0])
                 
+                logger.info(f"Resolved SSH key: {resolved_ssh_key}")
+                
                 # Stop containers on each remote host
                 if remote_hosts and ssh_user and resolved_ssh_key and _os.path.isfile(resolved_ssh_key):
                     for remote_host in remote_hosts:
                         try:
+                            logger.info(f"Attempting SSH to {remote_host}")
+                            
                             # Build stop commands
                             stop_cmds = []
                             for name in [canonical_name, new_name, staging_name]:
                                 stop_cmds.append(f"docker rm -f {name} 2>/dev/null || true")
                             
                             remote_cmd = '; '.join(stop_cmds)
+                            logger.info(f"Remote command: {remote_cmd}")
                             
                             # Execute via SSH
                             ssh_cmd = [
@@ -724,11 +746,16 @@ class Project(models.Model):
                                 f"{ssh_user}@{remote_host}",
                                 remote_cmd
                             ]
-                            subprocess.run(ssh_cmd, capture_output=True, timeout=30)
-                        except Exception:
+                            result = subprocess.run(ssh_cmd, capture_output=True, text=True, timeout=30)
+                            logger.info(f"SSH to {remote_host} result: stdout={result.stdout}, stderr={result.stderr}, returncode={result.returncode}")
+                        except Exception as e:
+                            logger.error(f"Failed SSH to {remote_host}: {e}")
                             # Continue even if one remote fails
                             pass
-            except Exception:
+                else:
+                    logger.warning(f"Skipping remote stop: hosts={bool(remote_hosts)}, user={bool(ssh_user)}, key={bool(resolved_ssh_key)}, key_exists={_os.path.isfile(resolved_ssh_key) if resolved_ssh_key else False}")
+            except Exception as e:
+                logger.error(f"Remote stop error: {e}")
                 # Don't fail the whole operation if remote stop fails
                 pass
 
@@ -736,8 +763,10 @@ class Project(models.Model):
             self.docker_container_id = ''
             self.status = 'stopped'
             self.save()
+            logger.info("Container stopped successfully on all hosts")
             return True, "Container stopped and removed successfully on all hosts"
         except Exception as e:
+            logger.error(f"Stop container failed: {e}")
             return False, str(e)
 
     def check_container_status(self):

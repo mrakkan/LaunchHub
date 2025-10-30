@@ -638,7 +638,7 @@ class Project(models.Model):
             return False, str(e)
     
     def stop_container(self):
-        """Stop Docker container"""
+        """Stop Docker container on local and all remote hosts"""
         try:
             # Derive canonical and temporary container names for this project
             repo_name = self.github_repo_url.split('/')[-1].replace('.git', '')
@@ -646,6 +646,7 @@ class Project(models.Model):
             staging_name = f"{repo_name}_{self.id}_staging"
             new_name = f"{canonical_name}_new"
 
+            # Stop on LOCAL host
             # Remove by container ID if present (force remove to ensure cleanup)
             if self.docker_container_id:
                 subprocess.run(['docker', 'rm', '-f', self.docker_container_id], capture_output=True)
@@ -654,11 +655,88 @@ class Project(models.Model):
             for name in [canonical_name, new_name, staging_name]:
                 subprocess.run(['docker', 'rm', '-f', name], capture_output=True)
 
+            # Stop on REMOTE hosts via SSH
+            try:
+                remote_hosts = getattr(settings, 'REMOTE_DEPLOY_HOSTS', []) or []
+                ssh_user = getattr(settings, 'REMOTE_DEPLOY_SSH_USER', '') or ''
+                ssh_key = getattr(settings, 'REMOTE_DEPLOY_SSH_KEY_PATH', '') or ''
+                
+                # Skip self if included
+                local_ip = getattr(settings, 'LOCAL_HOST_IP', '') or ''
+                if not local_ip:
+                    try:
+                        import requests as _requests
+                        token = ''
+                        try:
+                            token = _requests.put(
+                                'http://169.254.169.254/latest/api/token',
+                                headers={'X-aws-ec2-metadata-token-ttl-seconds': '21600'},
+                                timeout=1
+                            ).text.strip()
+                        except Exception:
+                            token = ''
+                        headers = {'X-aws-ec2-metadata-token': token} if token else {}
+                        try:
+                            local_ip = _requests.get(
+                                'http://169.254.169.254/latest/meta-data/local-ipv4',
+                                headers=headers,
+                                timeout=1
+                            ).text.strip()
+                        except Exception:
+                            local_ip = ''
+                    except Exception:
+                        local_ip = ''
+                if local_ip:
+                    remote_hosts = [h for h in remote_hosts if h != local_ip]
+                
+                # Resolve SSH key path
+                import os as _os
+                resolved_ssh_key = ssh_key
+                if resolved_ssh_key and _os.path.isdir(resolved_ssh_key):
+                    for _cand_name in ['backend-key.pem', 'id_rsa', 'id_ed25519']:
+                        _cand = _os.path.join(resolved_ssh_key, _cand_name)
+                        if _os.path.isfile(_cand):
+                            resolved_ssh_key = _cand
+                            break
+                    if _os.path.isdir(resolved_ssh_key):
+                        pem_files = [f for f in _os.listdir(resolved_ssh_key) if f.endswith('.pem')]
+                        if pem_files:
+                            resolved_ssh_key = _os.path.join(resolved_ssh_key, pem_files[0])
+                
+                # Stop containers on each remote host
+                if remote_hosts and ssh_user and resolved_ssh_key and _os.path.isfile(resolved_ssh_key):
+                    for remote_host in remote_hosts:
+                        try:
+                            # Build stop commands
+                            stop_cmds = []
+                            for name in [canonical_name, new_name, staging_name]:
+                                stop_cmds.append(f"docker rm -f {name} 2>/dev/null || true")
+                            
+                            remote_cmd = '; '.join(stop_cmds)
+                            
+                            # Execute via SSH
+                            ssh_cmd = [
+                                'ssh',
+                                '-o', 'StrictHostKeyChecking=no',
+                                '-o', 'UserKnownHostsFile=/dev/null',
+                                '-o', 'ConnectTimeout=10',
+                                '-i', resolved_ssh_key,
+                                f"{ssh_user}@{remote_host}",
+                                remote_cmd
+                            ]
+                            subprocess.run(ssh_cmd, capture_output=True, timeout=30)
+                        except Exception:
+                            # Continue even if one remote fails
+                            pass
+            except Exception:
+                # Don't fail the whole operation if remote stop fails
+                pass
+
             # Clear state
             self.docker_container_id = ''
             self.status = 'stopped'
             self.save()
-            return True, "Container stopped and removed successfully"
+            return True, "Container stopped and removed successfully on all hosts"
         except Exception as e:
             return False, str(e)
 
@@ -729,19 +807,13 @@ class Project(models.Model):
             return False
     
     def get_preview_url(self):
-        """Return preview URL if container is running.
-        For ALB setup with multiple listeners/target groups:
-        - Each port (5000-5019) should be accessible directly via ALB
-        - URL format: http://alb-dns:port/
-        """
         # First verify container is actually running
         is_running = self.check_container_status()
         if is_running and self.exposed_port:
             base = getattr(settings, 'PUBLIC_BASE_URL', '') or os.environ.get('PUBLIC_BASE_URL', '')
             if base:
                 base = base.rstrip('/')
-                # Always include port number for deployed projects
-                # ALB listeners should route each port to the correct target group
+
                 if self.exposed_port:
                     return f"{base}:{self.exposed_port}/"
                 return f"{base}/"

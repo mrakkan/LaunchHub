@@ -1,5 +1,4 @@
-# EasyDeploy
-This repository made for Hosting Web Service Project
+# LaunchDeploy
+This repository made for for Cloud Project
 
 
-test test test test test

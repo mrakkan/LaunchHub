@@ -77,7 +77,7 @@ class ProjectForm(forms.ModelForm):
         env_dict = {}
         for line in raw.splitlines():
             line = line.strip()
-            if not line or line.startswith('
+            if not line or line.startswith('#'):
                 continue
             if '=' not in line:
                 raise ValidationError('Invalid environment variable format. Use KEY=VALUE per line.')
